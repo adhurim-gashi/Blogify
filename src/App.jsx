@@ -3,6 +3,10 @@ import AdminLayout from "./layouts/AdminLayout";
 import Dashboard from "./pages/Dashboard";
 import Posts from "./pages/Posts";
 import Categories from "./pages/Categories";
+import CreatePost from "./pages/CreatePost"; 
+import CreateCategory from "./pages/CreateCategory";
+import Tags from "./pages/Tags";
+import CreateTag from "./pages/CreateTag";
 const App = () => {
   return (
     <Routes>
@@ -10,6 +14,13 @@ const App = () => {
       <Route index element={<Dashboard />}></Route>
       <Route path="posts" element={<Posts />} />
       <Route path="categories" element={<Categories />} />
+      <Route path="posts/create" element={<CreatePost />} />
+      <Route path="/categories/create" element={<CreateCategory />} />
+      <Route path="tags" element={<Tags />} />
+      <Route path="tags/create" element={<CreateTag />} />
+      
+
+
       </Route>
     </Routes>
   )
