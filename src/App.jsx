@@ -12,6 +12,9 @@ import Pages from "./pages/Pages";
 import CreatePage from "./pages/CreatePage";
 import Media from "./pages/Media"; 
 import UploadMedia from "./pages/UploadMedia";
+import Newsletter from "./pages/Newsletter";
+import Settings from "./pages/Settings";
+import Users from "./pages/Users";
 const App = () => {
   return (
     <Routes>
@@ -28,6 +31,9 @@ const App = () => {
       <Route path="pages/create" element={<CreatePage />} />
       <Route path="media" element={<Media />} />
       <Route path="media/upload" element={<UploadMedia />} />
+      <Route path="newsletter" element={<Newsletter />} />
+      <Route path="settings" element={<Settings />} />
+      <Route path="users" element={<Users />} />
       
       
 

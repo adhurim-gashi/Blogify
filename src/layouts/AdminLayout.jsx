@@ -5,8 +5,11 @@ const AdminLayout = () => {
   return (
     <div className="flex h-screen">
       <aside className="hidden md:block w-64 bg-slate-900 text-white p-4">
+        
         <nav className="mt-5">
-          <h1 className="mb-10 font-bold text-xl">Blogify</h1>
+          <p className="text-xs uppercase tracking -[0.2em] text-slate-400 mb-2">Admin Dashboard</p>
+          <h1 className="mb-10 font-bold text-2xl">Blogify</h1>
+          
           <ul className="space-y-3">
           <li>
           <NavLink
