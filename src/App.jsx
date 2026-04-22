@@ -8,6 +8,10 @@ import CreateCategory from "./pages/CreateCategory";
 import Tags from "./pages/Tags";
 import CreateTag from "./pages/CreateTag";
 import Comments from "./pages/Comments";
+import Pages from "./pages/Pages";
+import CreatePage from "./pages/CreatePage";
+import Media from "./pages/Media"; 
+import UploadMedia from "./pages/UploadMedia";
 const App = () => {
   return (
     <Routes>
@@ -20,6 +24,11 @@ const App = () => {
       <Route path="tags" element={<Tags />} />
       <Route path="tags/create" element={<CreateTag />} />
       <Route path="comments" element={<Comments />} />
+      <Route path="pages" element={<Pages />} />
+      <Route path="pages/create" element={<CreatePage />} />
+      <Route path="media" element={<Media />} />
+      <Route path="media/upload" element={<UploadMedia />} />
+      
       
 
 

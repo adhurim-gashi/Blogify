@@ -64,7 +64,7 @@ const Comments = () => {
                   </td>
                 </tr>
                 <tr className="border-b">
-                  <td className="py-2">Fatlind Uka</td>
+                  <td className="py-2">Fatlind Ukaj</td>
                   <td>Can you explain the routing part more?</td>
                   <td>Getting Started With React</td>
                   <td>
