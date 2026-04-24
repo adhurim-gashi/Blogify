@@ -15,6 +15,7 @@ import UploadMedia from "./pages/UploadMedia";
 import Newsletter from "./pages/Newsletter";
 import Settings from "./pages/Settings";
 import Users from "./pages/Users";
+import PublicLayout from "./layouts/PublicLayout";
 
 import HomePage from "./pages/public/HomePage";
 import BlogPage from "./pages/public/BlogPage";
@@ -27,11 +28,14 @@ const App = () => {
 
     <Routes>
       {/* Public Routes */}
+
+      <Route element={<PublicLayout />}>
       <Route path="/home" element={<HomePage />} />
       <Route path="/blog" element={<BlogPage />} />
       <Route path="/blog/:slug" element={<SinglePost />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/contact" element={<ContactPage />} />
+      </Route>
 
     
 

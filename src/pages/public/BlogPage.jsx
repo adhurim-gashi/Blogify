@@ -2,22 +2,7 @@ import { Link } from "react-router";
 
 const BlogPage = () =>  {
 return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-        <header className="border-b bg-white">
-            <div className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
-                <h1 className="text-2xl font-bold">Blogify</h1>
-
-                <nav className="flex gap-6 text-sm font-medium">
-                        <Link to="/home" className="hover:text-blue-500">Home</Link>
-                        <Link to="/blog" className="hover:text-blue-500">Blog</Link>
-                        <Link to="/about" className="hover:text-blue-500">About</Link>
-                        <Link to="/contact" className="hover:text-blue-500">Contact</Link>
-                    </nav>
-            </div>
-        </header>
-
-
-        <main className="mx-auto max-w-6xl px-6 py-16">
+        <section className="mx-auto max-w-6xl px-6 py-16">
             <div className="max-w-3xl">
                 <p className="text-sm font-semibold uppercase tracking-wide text-blue-500">
                     Blog Articles
@@ -102,8 +87,8 @@ return (
                     </Link>
                 </article>
             </div>
-        </main>
-    </div>
+        </section>
+           
 )
 }
 

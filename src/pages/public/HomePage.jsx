@@ -2,21 +2,9 @@ import { Link } from "react-router";
 
 const HomePage = () => {
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-900">
-            <header className="border-b bg-white">
-                <div className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
-                    <h1 className="text-2xl font-bold">Blogify</h1>
+   
 
-                    <nav className="flex gap-6 text-sm font-medium">
-                        <Link to="/home" className="hover:text-blue-500">Home</Link>
-                        <Link to="/blog" className="hover:text-blue-500">Blog</Link>
-                        <Link to="/about" className="hover:text-blue-500">About</Link>
-                        <Link to="/contact" className="hover:text-blue-500">Contact</Link>
-                    </nav>
-                </div>
-            </header>
-
-            <main>
+               <>
                 <section className="mx-auto max-w-6xl px-6 py-16">
                     <div className="max-w-3xl">
                         <p className="text-sm font-semibold uppercase tracking-wide text-blue-500">
@@ -42,7 +30,7 @@ const HomePage = () => {
                             </Link>
                         </div>
                     </div>
-                </section>
+                  </section>
 
                 <section className="mx-auto max-w-6xl px-6 pb-16">
                     <h3 className="text-2xl font-bold mb-6">Featured Posts</h3>
@@ -109,8 +97,9 @@ const HomePage = () => {
                         </div>
                     </div>
                 </section>
-            </main>
-        </div>
+                </>
+            
+       
     )
 }
 

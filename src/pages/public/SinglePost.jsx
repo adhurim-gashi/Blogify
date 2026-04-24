@@ -4,23 +4,9 @@ const SinglePost = () => {
 
     
 return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-        <header className="border-b bg-white">
-            <div className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
-             <h1 className="text-2xl font-bold">Blogify</h1>
-            
+       
 
-            <nav className="flex gap-6 text-sm font-medium">
-                <Link to="/home" className="hover:text-blue-500">Home</Link>
-                <Link to="/blog" className="hover:text-blue-500">Blog</Link>
-                <Link to="/about" className="hover:text-blue-500">About</Link>
-                <Link to="/contact" className="hover:text-blue-500">Contact</Link>
-            </nav>
-            </div>
-        </header>
-
-
-        <main className="mx-auto max-w-3xl px-6 py-12">
+        <div className="mx-auto max-w-3xl px-6 py-12">
             <Link 
             to="/blog"
             className="inline-block mb-8 text-blue-500 font-medium"
@@ -53,9 +39,28 @@ return (
                 <p className="mt-6 text-slate-700 leading-8">
                     Focus does not come from doing everything at once. It comes from choosing what deserves your attention and giving yourself the right environment to complete it.
                 </p>
+
+                <p className="mt-6 text-slate-700 leading-8">
+                    Developing focus is not about perfection. It is about creating better habits,
+                    staying consistent, and building a routine that supports meaningful work over time.
+                </p>
+
+                <div className="mt-10 pt-6 border-t">
+                    <p className="text-sm font-medium text-slate-700 mb-4">
+                        Was this article helpful?
+                    </p>
+
+                    <div className="flex gap-4">
+                        <button className="border border-green-500 text-green-600 px-4 py-2 rounded-md font-medium hover:bg-green-500 hover:text-white transition duration-300">
+                        👍 Like (24)
+                        </button>
+                        <button className="border border-red-500 text-red-600 px-4 py-2 rounded-md font-medium hover:bg-red-500 hover:text-white transition duration-300">
+                        👎 Dislike (19)
+                        </button>
+                </div>
+                </div>
             </article>
-        </main>
-    </div>
+        </div>
 )
 }
 
