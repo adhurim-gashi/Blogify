@@ -15,15 +15,33 @@ import UploadMedia from "./pages/UploadMedia";
 import Newsletter from "./pages/Newsletter";
 import Settings from "./pages/Settings";
 import Users from "./pages/Users";
+
+import HomePage from "./pages/public/HomePage";
+import BlogPage from "./pages/public/BlogPage";
+import SinglePost from "./pages/public/SinglePost";
+import AboutPage from "./pages/public/AboutPage";
+import ContactPage from "./pages/public/ContactPage";
+
 const App = () => {
   return (
+
     <Routes>
+      {/* Public Routes */}
+      <Route path="/home" element={<HomePage />} />
+      <Route path="/blog" element={<BlogPage />} />
+      <Route path="/blog/:slug" element={<SinglePost />} />
+      <Route path="/about" element={<AboutPage />} />
+      <Route path="/contact" element={<ContactPage />} />
+
+    
+
+
       <Route path="/" element={<AdminLayout />}>
-      <Route index element={<Dashboard />}></Route>
+      <Route index element={<Dashboard />} />
       <Route path="posts" element={<Posts />} />
       <Route path="categories" element={<Categories />} />
       <Route path="posts/create" element={<CreatePost />} />
-      <Route path="/categories/create" element={<CreateCategory />} />
+      <Route path="categories/create" element={<CreateCategory />} />
       <Route path="tags" element={<Tags />} />
       <Route path="tags/create" element={<CreateTag />} />
       <Route path="comments" element={<Comments />} />
@@ -34,10 +52,6 @@ const App = () => {
       <Route path="newsletter" element={<Newsletter />} />
       <Route path="settings" element={<Settings />} />
       <Route path="users" element={<Users />} />
-      
-      
-
-
       </Route>
     </Routes>
   )

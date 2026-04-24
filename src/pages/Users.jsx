@@ -12,11 +12,11 @@ const Users = () => {
                     <table className="w-full text-left">
                         <thead>
                             <tr className="border-b">
-                            <th className="py-2">Name</th>
-                            <th>Email</th>
-                            <th>Roles</th>
-                            <th>Status</th>
-                            <th>Actions</th>
+                                <th className="py-2">Name</th>
+                                <th>Email</th>
+                                <th>Roles</th>
+                                <th>Status</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
 
