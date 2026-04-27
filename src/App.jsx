@@ -22,6 +22,7 @@ import BlogPage from "./pages/public/BlogPage";
 import SinglePost from "./pages/public/SinglePost";
 import AboutPage from "./pages/public/AboutPage";
 import ContactPage from "./pages/public/ContactPage";
+import LoginPage from "./pages/public/LoginPage";
 
 const App = () => {
   return (
@@ -35,6 +36,8 @@ const App = () => {
       <Route path="/blog/:slug" element={<SinglePost />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/contact" element={<ContactPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      
       </Route>
 
     

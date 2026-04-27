@@ -82,7 +82,7 @@ const ContactPage = () => {
 
                             <div>
                                 <p className="font-medium text-slate-900">Email</p>
-                                <p>contact@blogify.com</p>
+                                <p>adhurimgashi.dev@gmail.com</p>
                             </div>
                         </div>
                     </div>

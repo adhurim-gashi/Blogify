@@ -13,6 +13,8 @@ const PublicLayout = () => {
                         <Link to="/blog" className="text-slate-700 border-b-2 border-transparent hover:border-blue-500 hover:text-blue-500 transition duration-300 pb-1">Blog</Link>
                         <Link to="/about" className="text-slate-700 border-b-2 border-transparent hover:border-blue-500 hover:text-blue-500 transition duration-300 pb-1">About</Link>
                         <Link to="/contact" className="text-slate-700 border-b-2 border-transparent hover:border-blue-500 hover:text-blue-500 transition duration-300 pb-1">Contact</Link>
+                        <Link to="/login" className="text-slate-700 border-b-2 border-transparent hover:border-blue-500 hover:text-blue-500 transition duration-300 pb-1">
+                        Login</Link>
                     </nav>
                 </div>
             </header>

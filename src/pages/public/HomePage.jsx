@@ -2,9 +2,7 @@ import { Link } from "react-router";
 
 const HomePage = () => {
     return (
-   
-
-               <>
+            <>
                 <section className="mx-auto max-w-6xl px-6 py-16">
                     <div className="max-w-3xl">
                         <p className="text-sm font-semibold uppercase tracking-wide text-blue-500">
@@ -18,13 +16,13 @@ const HomePage = () => {
                         <div className="mt-8 flex gap-4">
                             <Link
                             to="/blog"
-                            className="bg-blue-500 text-white px-5 py-3 rounded-md font-medium"
+                            className="bg-blue-500 text-white px-5 py-3 rounded-md font-medium hover:bg-blue-600 transition duration-300"
                             >
                                 Explore Blog
                             </Link>
                             <Link
                             to="/about"
-                            className="bg-blue-500 text-white px-5 py-3 rounded-md font-medium"
+                            className="bg-blue-500 text-white px-5 py-3 rounded-md font-medium hover:bg-blue-600 transition duration-300"
                             >
                                 Learn More
                             </Link>
@@ -97,9 +95,7 @@ const HomePage = () => {
                         </div>
                     </div>
                 </section>
-                </>
-            
-       
+            </>
     )
 }
 

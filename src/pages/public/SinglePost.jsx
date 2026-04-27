@@ -4,9 +4,7 @@ const SinglePost = () => {
 
     
 return (
-       
-
-        <div className="mx-auto max-w-3xl px-6 py-12">
+       <div className="mx-auto max-w-3xl px-6 py-12">
             <Link 
             to="/blog"
             className="inline-block mb-8 text-blue-500 font-medium"
@@ -61,7 +59,7 @@ return (
                 </div>
             </article>
         </div>
-)
+)   
 }
 
 
