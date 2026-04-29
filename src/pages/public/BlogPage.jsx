@@ -13,6 +13,18 @@ return (
                 </p>
             </div>
 
+            <div className="mt-8 max-w-xl">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Search Posts
+                </label>
+
+                <input 
+                type="text"
+                placeholder="Search articles..."
+                className="w-full border border-slate-300 rounded-md px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                />
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
                 <article className="bg-white rounded-xl shadow p-5">
                     <p className="text-sm text-blue-500 font-medium">Productivity</p>

@@ -1,4 +1,4 @@
-import { Link, Outlet } from "react-router";
+import { NavLink, Outlet } from "react-router";
 
 const PublicLayout = () => {
     return (
@@ -9,12 +9,61 @@ const PublicLayout = () => {
 
 
                     <nav className="flex gap-6 text-sm font-medium">
-                        <Link to="/home" className="text-slate-700 border-b-2 border-transparent hover:border-blue-500 hover:text-blue-500 transition duration-300 pb-1">Home</Link>
-                        <Link to="/blog" className="text-slate-700 border-b-2 border-transparent hover:border-blue-500 hover:text-blue-500 transition duration-300 pb-1">Blog</Link>
-                        <Link to="/about" className="text-slate-700 border-b-2 border-transparent hover:border-blue-500 hover:text-blue-500 transition duration-300 pb-1">About</Link>
-                        <Link to="/contact" className="text-slate-700 border-b-2 border-transparent hover:border-blue-500 hover:text-blue-500 transition duration-300 pb-1">Contact</Link>
-                        <Link to="/login" className="text-slate-700 border-b-2 border-transparent hover:border-blue-500 hover:text-blue-500 transition duration-300 pb-1">
-                        Login</Link>
+                       <NavLink
+                       to="/home"
+                       className={({isActive}) => 
+                        `text-slate-700 border-b-2 pb-1 transition duration-300 ${
+                            isActive 
+                            ? "border-blue-500 text-blue-500"
+                            : "border-transparent hover:border-blue-500 hover:text-blue-500"
+                        }`
+                        }>
+                        Home
+                       </NavLink>
+                       <NavLink
+                       to="/about"
+                       className={({isActive}) => 
+                        `text-slate-700 border-b-2 pb-1 transition duration-300 ${
+                            isActive 
+                            ? "border-blue-500 text-blue-500"
+                            : "border-transparent hover:border-blue-500 hover:text-blue-500"
+                        }`
+                        }>
+                        About
+                       </NavLink>
+                       <NavLink
+                       to="/blog"
+                       className={({isActive}) => 
+                        `text-slate-700 border-b-2 pb-1 transition duration-300 ${
+                            isActive 
+                            ? "border-blue-500 text-blue-500"
+                            : "border-transparent hover:border-blue-500 hover:text-blue-500"
+                        }`
+                        }>
+                        Blog
+                       </NavLink>
+                       <NavLink
+                       to="/contact"
+                       className={({isActive}) => 
+                        `text-slate-700 border-b-2 pb-1 transition duration-300 ${
+                            isActive 
+                            ? "border-blue-500 text-blue-500"
+                            : "border-transparent hover:border-blue-500 hover:text-blue-500"
+                        }`
+                        }>
+                        Contact
+                       </NavLink>
+                       <NavLink
+                       to="/login"
+                       className={({isActive}) => 
+                        `text-slate-700 border-b-2 pb-1 transition duration-300 ${
+                            isActive 
+                            ? "border-blue-500 text-blue-500"
+                            : "border-transparent hover:border-blue-500 hover:text-blue-500"
+                        }`
+                        }>
+                        Login
+                       </NavLink>
                     </nav>
                 </div>
             </header>
@@ -34,3 +83,7 @@ const PublicLayout = () => {
 
 
 export default PublicLayout;
+
+
+
+

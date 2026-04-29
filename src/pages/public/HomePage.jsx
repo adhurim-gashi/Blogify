@@ -52,7 +52,7 @@ const HomePage = () => {
                             </h4>
 
                             <p className="mt-3 text-slate-600">
-                                Explore modern interface ideas, clean layours, and user-friendly design patterns for web apps.
+                                Explore modern interface ideas, clean layouts, and user-friendly design patterns for web apps.
                             </p>
                         </article>
 
@@ -75,7 +75,7 @@ const HomePage = () => {
                         <h3 className="text-2xl font-bold">Why Blogify?</h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
                             <div className="rounded-xl border p-5">
-                                <h4 className="font-semibold text-lg">Content Managment</h4>
+                                <h4 className="font-semibold text-lg">Content Management</h4>
                                 <p className="mt-2 text-slate-600">
                                     Create, edit, organize, and publish blog content through a clean admin panel.
                                 </p>
@@ -95,6 +95,28 @@ const HomePage = () => {
                         </div>
                     </div>
                 </section>
+
+            
+
+
+            <section className="bg-white border-t">
+                <div className="mx-auto max-w-6xl px-6 py-16 text-center">
+                    <h3 className="text-2xl font-bold">Stay Updated</h3>
+                    <p className="mt-3 text-slate-600">Subscribe to receive the latest posts and updates from Blogify.</p>
+                    <form className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+                    <input 
+                    type="email"
+                    placeholder="Enter your email"
+                    className="border border-slate-300 rounded-md px-4 py-3 w-full sm:w-80 outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    />
+
+                    <button type="submit" className="bg-blue-500 text-white px-5 py-3 rounded-md font-medium hover:bg-blue-600">Subscribe</button>
+                </form>
+                </div>
+
+               
+            </section>
+
             </>
     )
 }

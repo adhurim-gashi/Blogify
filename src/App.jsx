@@ -23,6 +23,7 @@ import SinglePost from "./pages/public/SinglePost";
 import AboutPage from "./pages/public/AboutPage";
 import ContactPage from "./pages/public/ContactPage";
 import LoginPage from "./pages/public/LoginPage";
+import ProfilePage from "./pages/public/ProfilePage";
 
 const App = () => {
   return (
@@ -37,6 +38,7 @@ const App = () => {
       <Route path="/about" element={<AboutPage />} />
       <Route path="/contact" element={<ContactPage />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/profile" element={<ProfilePage />} />
       
       </Route>
 
