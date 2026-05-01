@@ -1,6 +1,28 @@
 import { Link } from "react-router";
+import { useState } from "react";
+
 
 const HomePage = () => {
+    const [subscriberEmail, setSubscriberEmail] = useState(""); 
+    const [subscriberError, setSubscriberError] = useState(""); 
+
+    const handleSubscribe = (e) => {
+        e.preventDefault();
+
+        if (!subscriberEmail.trim()) {
+            setSubscriberError("Please enter your email address.");
+            return; 
+        }
+
+        if (!subscriberEmail.includes("@")) {
+            setSubscriberError("Please enter a valid email address."); 
+            return
+        }
+
+        setSubscriberError("")
+        console.log("Subscribed:", subscriberEmail);
+    }
+
     return (
             <>
                 <section className="mx-auto max-w-6xl px-6 py-16">
@@ -10,7 +32,7 @@ const HomePage = () => {
                         </p>
                         <h2 className="mt-4 text-5xl font-bold leading-tight">Share ideas, publish stories, and manage your content with ease</h2>
                         <p className="mt-6 text-lg text-slate-600">
-                            Blogify is a modern blog content managment system built for writing, organizing, and publishing articles with categories, tags, comments, and media management.
+                            Blogify is a modern blog content management system built for writing, organizing, and publishing articles with categories, tags, comments, and media management.
                         </p>
 
                         <div className="mt-8 flex gap-4">
@@ -103,15 +125,26 @@ const HomePage = () => {
                 <div className="mx-auto max-w-6xl px-6 py-16 text-center">
                     <h3 className="text-2xl font-bold">Stay Updated</h3>
                     <p className="mt-3 text-slate-600">Subscribe to receive the latest posts and updates from Blogify.</p>
-                    <form className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+                    <form className="mt-6 flex flex-col sm:flex-row gap-3 justify-center"
+                    onSubmit={handleSubscribe}
+                    >
+                        
                     <input 
                     type="email"
                     placeholder="Enter your email"
+                    value={subscriberEmail}
+                    onChange={(e) => setSubscriberEmail(e.target.value)}
                     className="border border-slate-300 rounded-md px-4 py-3 w-full sm:w-80 outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                     />
-
-                    <button type="submit" className="bg-blue-500 text-white px-5 py-3 rounded-md font-medium hover:bg-blue-600">Subscribe</button>
+                   
+                    <button type="submit" className="bg-blue-500 text-white px-5 py-3 rounded-md font-medium hover:bg-blue-600 transition duration-300">Subscribe</button>
+                   
                 </form>
+                {subscriberError && (
+                        <p className="text-red-500 text-sm mt-2 text-center">
+                            {subscriberError}
+                        </p>
+                    )}
                 </div>
 
                
