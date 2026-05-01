@@ -1,0 +1,61 @@
+{
+  "info": {
+    "name": "Blogify Backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:4000" },
+    { "key": "accessToken", "value": "" }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "exec": [
+          "// If accessToken variable is set, add Authorization header",
+          "if (pm.environment.get('accessToken')) {",
+          "  pm.request.headers.add({ key: 'Authorization', value: 'Bearer ' + pm.environment.get('accessToken') });",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/health" }
+    },
+    {
+      "name": "Register",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@blogify.local\",\n  \"username\": \"admin\",\n  \"password\": \"password123\"\n}" },
+        "url": "{{baseUrl}}/api/auth/register"
+      }
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@blogify.local\",\n  \"password\": \"password123\"\n}" },
+        "url": "{{baseUrl}}/api/auth/login"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Posts (auth optional)",
+      "request": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/posts" }
+    },
+    {
+      "name": "Create Post (requires auth)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"title\": \"Hello\",\n  \"content\": \"<p>Hi</p>\"\n}" },
+        "url": "{{baseUrl}}/api/posts"
+      }
+    }
+  ]
+}

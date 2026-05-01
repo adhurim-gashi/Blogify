@@ -1,0 +1,648 @@
+openapi: 3.0.3
+info:
+  title: Blogify Backend API
+  version: "1.0.0"
+servers:
+  - url: http://localhost:4000
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+
+  /api/auth/register:
+    post:
+      summary: Register user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Register'
+      responses:
+        '200':
+          description: Registered
+
+  /api/auth/login:
+    post:
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+      responses:
+        '200':
+          description: Auth tokens
+
+  /api/auth/refresh:
+    post:
+      summary: Refresh access token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh:
+                  type: string
+      responses:
+        '200':
+          description: New access token
+
+  /api/auth/logout:
+    post:
+      summary: Logout (revoke refresh token)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh:
+                  type: string
+      responses:
+        '200':
+          description: Logged out
+
+  /api/users:
+    get:
+      summary: List users (Admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: perPage
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: list
+    post:
+      summary: (not implemented)
+
+  /api/users/me:
+    get:
+      summary: Current user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: current user
+
+  /api/users/{id}:
+    get:
+      summary: Get user by id
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: user
+    put:
+      summary: Update user
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUser'
+      responses:
+        '200':
+          description: updated
+    delete:
+      summary: Soft-delete user (Admin)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: deleted
+
+  /api/posts:
+    get:
+      summary: List posts
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: perPage
+          schema:
+            type: integer
+        - in: query
+          name: q
+          schema:
+            type: string
+      responses:
+        '200':
+          description: list
+    post:
+      summary: Create post
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePost'
+      responses:
+        '200':
+          description: created
+
+  /api/posts/{slug}:
+    get:
+      summary: Get post by slug
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: post
+
+  /api/posts/{id}:
+    put:
+      summary: Update post
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePost'
+      responses:
+        '200':
+          description: updated
+    delete:
+      summary: Soft-delete post
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: deleted
+
+  /api/categories:
+    get:
+      summary: List categories
+      responses:
+        '200':
+          description: list
+    post:
+      summary: Create category
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Category'
+      responses:
+        '200':
+          description: created
+
+  /api/categories/{id}:
+    put:
+      summary: Update category
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Category'
+      responses:
+        '200':
+          description: updated
+    delete:
+      summary: Delete category
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: deleted
+
+  /api/tags:
+    get:
+      summary: List tags
+      responses:
+        '200':
+          description: list
+    post:
+      summary: Create tag
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Tag'
+      responses:
+        '200':
+          description: created
+
+  /api/tags/{id}:
+    put:
+      summary: Update tag
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Tag'
+      responses:
+        '200':
+          description: updated
+    delete:
+      summary: Delete tag
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: deleted
+
+  /api/comments:
+    post:
+      summary: Create comment (auth)
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateComment'
+      responses:
+        '200':
+          description: created
+    delete:
+      summary: Delete comment (soft)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: deleted
+
+  /api/comments/post/{postId}:
+    get:
+      summary: List comments for post
+      parameters:
+        - in: path
+          name: postId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: list
+
+  /api/pages:
+    get:
+      summary: List pages
+      responses:
+        '200':
+          description: list
+    post:
+      summary: Create page
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePage'
+      responses:
+        '200':
+          description: created
+
+  /api/pages/{slug}:
+    get:
+      summary: Get page by slug
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: page
+
+  /api/pages/{id}:
+    put:
+      summary: Update page
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePage'
+      responses:
+        '200':
+          description: updated
+    delete:
+      summary: Soft-delete page
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: deleted
+
+  /api/media:
+    get:
+      summary: List media
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: perPage
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: list
+    post:
+      summary: Upload media (multipart)
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: uploaded
+
+  /api/newsletter/subscribe:
+    post:
+      summary: Subscribe to newsletter
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Subscribe'
+      responses:
+        '200':
+          description: subscribed
+
+  /api/dashboard/stats:
+    get:
+      summary: Dashboard stats (Admin)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: stats
+
+  /api/settings:
+    get:
+      summary: List settings
+      responses:
+        '200':
+          description: list
+    post:
+      summary: Create setting
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Setting'
+      responses:
+        '200':
+          description: created
+
+  /api/settings/{id}:
+    put:
+      summary: Update setting
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Setting'
+      responses:
+        '200':
+          description: updated
+    delete:
+      summary: Delete setting
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: deleted
+
+  /api/auth/register:
+    post:
+      summary: Register user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Register'
+      responses:
+        '200':
+          description: Registered
+
+  /api/auth/login:
+    post:
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+      responses:
+        '200':
+          description: Auth tokens
+
+  /api/posts:
+    get:
+      summary: List posts
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: perPage
+          schema:
+            type: integer
+        - in: query
+          name: q
+          schema:
+            type: string
+      responses:
+        '200':
+          description: list
+    post:
+      summary: Create post
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePost'
+      responses:
+        '200':
+          description: created
+
+  /api/posts/{slug}:
+    get:
+      summary: Get post by slug
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: post
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Register:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        username:
+          type: string
+        password:
+          type: string
+    Login:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+    CreatePost:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        excerpt:
+          type: string
+        status:
+          type: string
+    UpdatePost:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        excerpt:
+          type: string
+        status:
+          type: string
+    Category:
+      type: object
+      properties:
+        name:
+          type: string
+    Tag:
+      type: object
+      properties:
+        name:
+          type: string
+    CreateComment:
+      type: object
+      properties:
+        content:
+          type: string
+        postId:
+          type: string
+        parentId:
+          type: string
+    CreatePage:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+    Subscribe:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+    UpdateUser:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        username:
+          type: string
+        name:
+          type: string
+        bio:
+          type: string
+    Setting:
+      type: object
+      properties:
+        key:
+          type: string
+        value:
+          type: string
