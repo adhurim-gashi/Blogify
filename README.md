@@ -1,16 +1,46 @@
-# React + Vite
+Blogify CMS
+Blogify CMS is a modern content management system built for creating, organizing, and publishing blog content. It includes a public-facing blog for readers and an admin dashboard for managing content and platform data.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Features
+Public homepage, blog page, and single post page
+Admin dashboard layout
+Posts management
+Categories management
+Tags management
+Comments section
+Media management
+Newsletter subscriber management
+User management
+Login page UI
+Profile page UI
+Blog search bar UI
+Like and dislike interaction UI
+Contact form with custom frontend validation
+Newsletter subscribe form with custom frontend validation
+Tech Stack
+React
+React Router
+Tailwind CSS
+Vite
+Project Structure
+src/pages/public - public-facing pages
+src/pages/admin - admin dashboard pages
+src/layouts - shared layout components
+src/components - reusable UI components
+Getting Started
+Clone the repository
+Install dependencies
+npm install
+Start the development server
+npm run dev
+Open the project in your browser using the local Vite development URL
+Notes
+This project currently focuses on the frontend structure and user interface of the CMS platform. Backend functionality such as authentication, database integration, API connections, and full CRUD operations will be handled separately.
 
-Currently, two official plugins are available:
+Team
+Adhurim Gashi
+Albion Krasniqi
+Fatlind Ukaj
+Purpose
+This project was created as a student project to build a blog CMS platform with both a public user interface and an admin management dashboard.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
