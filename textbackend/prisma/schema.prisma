@@ -14,6 +14,9 @@ model User {
   password     String
   name         String?
   bio          String?
+  // `disabled` flag allows administrators to disable/enable accounts without deleting
+  // Implements spec: #13 Users API - disable/activate user
+  disabled     Boolean   @default(false)
   role         Role      @relation(fields: [roleId], references: [id])
   roleId       String
   posts        Post[]
@@ -82,6 +85,10 @@ model Tag {
 model Comment {
   id        String   @id @default(uuid())
   content   String
+  // Added `approved` flag to support moderation workflows (approve/reject)
+  // Implements spec: #8 Comments API — approve/reject comment
+  // Default false ensures new comments require moderation unless published automatically
+  approved  Boolean  @default(false)
   author    User     @relation(fields: [authorId], references: [id])
   authorId  String
   post      Post     @relation(fields: [postId], references: [id])
