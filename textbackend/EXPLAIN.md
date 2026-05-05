@@ -10,6 +10,7 @@ This document explains models, relations, endpoints, how to run, env variables, 
 - `Category` - categories with `name` and `slug`. Many-to-many with `Post` (via implicit relation).
 - `Tag` - tags for posts. Many-to-many with `Post`.
 - `Comment` - comments referencing `post` and `author`.
+  - Note: `Comment` now includes `approved` boolean (default false) to support moderation.
 - `Page` - static pages with `title`, `slug`, `content`.
 - `Media` - uploaded files metadata: `filename`, `filepath`, `mimetype`, `size`, optional dimensions, `uploader`.
 - `Setting` - key/value pairs for site settings.
@@ -35,11 +36,24 @@ This document explains models, relations, endpoints, how to run, env variables, 
 
 - POST /api/media - upload file (`multipart/form-data`, field `file`). Auth required. Stores file under `uploads/` and creates Media record.
 - GET /api/media - list media.
+ - DELETE /api/media/:id - delete media (Admin/Author). Removes DB record and attempts to unlink file on disk. Implements spec #10.
 
 - GET /api/users - list users. Auth: `Admin`.
 - GET /api/users/me - current user (requires access token).
+ - POST /api/users/:id/disable - disable user (Admin only).
+ - POST /api/users/:id/activate - activate user (Admin only).
+  Note: `User` now includes `disabled` boolean to support enable/disable (spec #13).
 
 - GET /api/dashboard/stats - Admin-only stats: counts of users/posts/categories/comments/media/tags.
+
+Comments moderation:
+- POST /api/comments/:id/approve - Admin/Author: approve a comment (sets `approved=true`).
+- POST /api/comments/:id/reject - Admin/Author: reject (soft-delete) a comment.
+
+Newsletter subscribers:
+- POST /api/newsletter/subscribe - subscribe (public).
+- GET /api/newsletter/subscribers - list subscribers (Admin only).
+- DELETE /api/newsletter/subscribers/:id - remove subscriber (Admin only).
 
 Responses follow a consistent shape:
 

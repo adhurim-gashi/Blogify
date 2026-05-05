@@ -3,8 +3,17 @@ const { makeSlug } = require('../utils/slugify');
 
 async function list(req, res, next) {
   try {
-    const tags = await prisma.tag.findMany({ orderBy: { createdAt: 'desc' } });
-    res.json({ success: true, data: { tags } });
+    // Add pagination and optional search for tags to satisfy list endpoint requirement
+    // Implements spec: #6 Tags API and Additional Requirements: pagination
+    const { page = 1, perPage = 20, q } = req.validated || req.query;
+    const take = parseInt(perPage);
+    const skip = (parseInt(page) - 1) * take;
+    const where = q ? { name: { contains: q, mode: 'insensitive' } } : {};
+    const [tags, total] = await prisma.$transaction([
+      prisma.tag.findMany({ where, skip, take, orderBy: { createdAt: 'desc' } }),
+      prisma.tag.count({ where })
+    ]);
+    res.json({ success: true, data: { tags, meta: { total, page: parseInt(page), perPage: take } } });
   } catch (err) { next(err); }
 }
 

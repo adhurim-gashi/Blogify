@@ -10,4 +10,10 @@ router.post('/', requireAuth, perUserRateLimit({ max: 60 }), validate(createComm
 router.get('/post/:postId', validate(postIdParam), commentsController.listByPost);
 router.delete('/:id', requireAuth, perUserRateLimit({ max: 60 }), validate(idParam), commentsController.remove);
 
+// Approve a comment - only Admins/Authors
+router.post('/:id/approve', requireAuth, perUserRateLimit({ max: 30 }), requireRole('Admin','Author'), validate(idParam), commentsController.approve);
+
+// Reject a comment (soft-delete) - only Admins/Authors
+router.post('/:id/reject', requireAuth, perUserRateLimit({ max: 30 }), requireRole('Admin','Author'), validate(idParam), commentsController.reject);
+
 module.exports = router;

@@ -2,8 +2,17 @@ const prisma = require('../utils/prisma');
 
 async function list(req, res, next) {
   try {
-    const items = await prisma.setting.findMany({ orderBy: { key: 'asc' } });
-    res.json({ success: true, data: { settings: items } });
+    // Support pagination for settings listing to satisfy global pagination requirement
+    // Implements spec #12: Settings API and Additional Requirements: pagination
+    const { page = 1, perPage = 50, q } = req.validated || req.query;
+    const take = parseInt(perPage);
+    const skip = (parseInt(page) - 1) * take;
+    const where = q ? { key: { contains: q, mode: 'insensitive' } } : {};
+    const [items, total] = await prisma.$transaction([
+      prisma.setting.findMany({ where, skip, take, orderBy: { key: 'asc' } }),
+      prisma.setting.count({ where })
+    ]);
+    res.json({ success: true, data: { settings: items, meta: { total, page: parseInt(page), perPage: take } } });
   } catch (err) { next(err); }
 }
 

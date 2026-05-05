@@ -3,8 +3,17 @@ const { makeSlug } = require('../utils/slugify');
 
 async function list(req, res, next) {
   try {
-    const cats = await prisma.category.findMany({ orderBy: { createdAt: 'desc' } });
-    res.json({ success: true, data: { categories: cats } });
+    // Support pagination and search for categories
+    // Implements spec: #5 Categories API and Additional Requirements: pagination
+    const { page = 1, perPage = 20, q } = req.validated || req.query;
+    const take = parseInt(perPage);
+    const skip = (parseInt(page) - 1) * take;
+    const where = q ? { name: { contains: q, mode: 'insensitive' } } : {};
+    const [cats, total] = await prisma.$transaction([
+      prisma.category.findMany({ where, skip, take, orderBy: { createdAt: 'desc' } }),
+      prisma.category.count({ where })
+    ]);
+    res.json({ success: true, data: { categories: cats, meta: { total, page: parseInt(page), perPage: take } } });
   } catch (err) { next(err); }
 }
 

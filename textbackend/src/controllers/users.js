@@ -50,4 +50,23 @@ async function remove(req, res, next) {
   } catch (err) { next(err); }
 }
 
-module.exports = { list, me, get, update, remove };
+// Disable a user account without deleting it (sets `disabled = true`)
+// Implements spec #13: disable/activate user
+async function disable(req, res, next) {
+  try {
+    const { id } = req.validated || req.params;
+    const updated = await prisma.user.update({ where: { id }, data: { disabled: true } });
+    res.json({ success: true, data: { user: updated } });
+  } catch (err) { next(err); }
+}
+
+// Activate (enable) a previously disabled user
+async function activate(req, res, next) {
+  try {
+    const { id } = req.validated || req.params;
+    const updated = await prisma.user.update({ where: { id }, data: { disabled: false } });
+    res.json({ success: true, data: { user: updated } });
+  } catch (err) { next(err); }
+}
+
+module.exports = { list, me, get, update, remove, disable, activate };

@@ -13,5 +13,9 @@ const { idParam } = require('../validation/common');
 router.get('/:id', requireAuth, validate(idParam), usersController.get);
 router.put('/:id', requireAuth, perUserRateLimit({ max: 30 }), validate(updateUserSchema), usersController.update);
 router.delete('/:id', requireAuth, requireRole('Admin'), validate(idParam), usersController.remove);
+// Disable user (Admin only)
+router.post('/:id/disable', requireAuth, requireRole('Admin'), validate(idParam), usersController.disable);
+// Activate user (Admin only)
+router.post('/:id/activate', requireAuth, requireRole('Admin'), validate(idParam), usersController.activate);
 
 module.exports = router;

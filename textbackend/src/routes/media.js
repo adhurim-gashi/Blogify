@@ -18,5 +18,9 @@ const perUserRateLimit = require('../middlewares/perUserRateLimit');
 
 router.post('/', requireAuth, perUserRateLimit({ max: 30 }), upload.single('file'), mediaController.upload);
 router.get('/', validate(listMediaSchema), mediaController.list);
+const { idParam } = require('../validation/common');
+
+// Delete media - only Admin/Author
+router.delete('/:id', requireAuth, perUserRateLimit({ max: 20 }), requireRole('Admin','Author'), validate(idParam), mediaController.remove);
 
 module.exports = router;

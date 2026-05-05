@@ -5,3 +5,8 @@ const subscribeSchema = z.object({
 });
 
 module.exports = { subscribeSchema };
+
+// Pagination for subscribers listing (admin)
+const listSubscribersSchema = z.object({ page: z.string().optional(), perPage: z.string().optional(), q: z.string().max(200).optional() });
+
+module.exports = { subscribeSchema, listSubscribersSchema };

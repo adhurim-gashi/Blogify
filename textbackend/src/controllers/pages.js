@@ -4,8 +4,18 @@ const sanitizeHtml = require('sanitize-html');
 
 async function list(req, res, next) {
   try {
-    const pages = await prisma.page.findMany({ where: { deletedAt: null }, orderBy: { createdAt: 'desc' } });
-    res.json({ success: true, data: { pages } });
+    // Implement pagination for pages list per Additional Requirements
+    // Implements spec: #9 Pages API and requirement: pagination
+    const { page = 1, perPage = 20, q } = req.validated || req.query;
+    const take = parseInt(perPage);
+    const skip = (parseInt(page) - 1) * take;
+    const where = { deletedAt: null };
+    if (q) where.AND = [{ OR: [{ title: { contains: q, mode: 'insensitive' } }, { content: { contains: q, mode: 'insensitive' } }] }];
+    const [pages, total] = await prisma.$transaction([
+      prisma.page.findMany({ where, skip, take, orderBy: { createdAt: 'desc' } }),
+      prisma.page.count({ where })
+    ]);
+    res.json({ success: true, data: { pages, meta: { total, page: parseInt(page), perPage: take } } });
   } catch (err) { next(err); }
 }
 
@@ -31,6 +41,7 @@ async function create(req, res, next) {
 async function update(req, res, next) {
   try {
     const { id } = req.validated || req.params;
+    // Allow partial updates validated via Zod in routes
     const raw = req.validated || req.body;
     if (raw.content) raw.content = sanitizeHtml(raw.content, { allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img','h1','h2','h3']), allowedAttributes: { a: ['href','name','target'], img: ['src','alt'] } });
     const data = raw;

@@ -1,4 +1,6 @@
 require('dotenv').config();
+// Validate and normalize environment variables before anything else
+const config = require('./config/env');
 const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
@@ -27,7 +29,8 @@ app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
 app.set('trust proxy', true);
 app.use(helmet({ contentSecurityPolicy: false }));
-const allowed = process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : ['http://localhost:5173'];
+const allowed = config.corsOrigins;
+// Use CORS origin whitelist from validated config
 app.use(cors({ origin: function (origin, cb) { if (!origin) return cb(null, true); if (allowed.indexOf(origin) !== -1) return cb(null, true); return cb(new Error('Not allowed by CORS')); } }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -36,6 +39,7 @@ app.use(morgan('combined'));
 // Response wrapper for consistent responses
 app.use(responseWrapper);
 
+// Global rate limiter for public endpoints
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 200 });
 app.use(limiter);
 
@@ -55,7 +59,7 @@ app.use('/api/settings', settingsRoutes);
 
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 4000;
+const PORT = config.port || 4000;
 app.listen(PORT, () => {
   console.log(`Blogify backend listening on port ${PORT}`);
 });
