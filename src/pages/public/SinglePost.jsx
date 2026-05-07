@@ -1,6 +1,18 @@
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 const SinglePost = () => {
+
+    const navigate = useNavigate();
+
+    const handleReaction = () => {
+        const user = localStorage.getItem("user"); 
+        if (!user) {
+            navigate("/login")
+        }
+    
+    }
+
+  
     return (
         <div className="mx-auto max-w-3xl px-6 py-12">
             <Link 
@@ -47,10 +59,14 @@ const SinglePost = () => {
 
 
                     <div className="flex gap-4">
-                        <button className="border border-green-500 text-green-600 px-4 py-2 rounded-md font-medium hover:bg-green-500 hover:text-white transition duration-300">
+                        <button className="border border-green-500 text-green-600 px-4 py-2 rounded-md font-medium hover:bg-green-500 hover:text-white transition duration-300"
+                        onClick={handleReaction}
+                        >
                         👍 Like (24)
                         </button>
-                        <button className="border border-red-500 text-red-600 px-4 py-2 rounded-md font-medium hover:bg-red-500 hover:text-white transition duration-300">
+                        <button className="border border-red-500 text-red-600 px-4 py-2 rounded-md font-medium hover:bg-red-500 hover:text-white transition duration-300"
+                        onClick={handleReaction}
+                        >
                         👎 Dislike (16)
 
                         </button>

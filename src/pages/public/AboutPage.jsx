@@ -1,5 +1,6 @@
 import adhurim from "../../assets/team/adhurim.jpg"; 
 import albion from "../../assets/team/albion.jpeg"; 
+import fatlind from "../../assets/team/fatlind.jpeg"; 
 
 
 const AboutPage = () => {
@@ -54,7 +55,7 @@ const AboutPage = () => {
 
                     <div className="bg-white rounded-xl shadow p-5 text-center">
                         <img 
-                        src={adhurim}
+                        src={fatlind}
                         alt="Fatlind Ukaj"
                         className="w-32 h-32 rounded-full object-cover mx-auto"
                         />

@@ -44,7 +44,7 @@ const App = () => {
 
     
 
-
+    
       <Route path="/" element={<AdminLayout />}>
       <Route index element={<Dashboard />} />
       <Route path="posts" element={<Posts />} />

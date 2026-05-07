@@ -36,7 +36,7 @@ return (
                 </p>
                 <h2 className="mt-3 text-3xl font-bold">Login to Blogify</h2>
                 <p>
-                Sign in to access your account and manage your content.
+                To receive a user account, please contact an administrator.
                 </p>
             </div>
 
