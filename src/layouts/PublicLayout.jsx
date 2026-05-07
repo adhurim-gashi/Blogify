@@ -1,6 +1,8 @@
-import { NavLink, Outlet } from "react-router";
+import { NavLink, Outlet, useLocation } from "react-router";
+
 
 const PublicLayout = () => {
+const location = useLocation();
     return (
         <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
             <header className="border-b bg-white">
@@ -69,7 +71,9 @@ const PublicLayout = () => {
             </header>
 
             <main className="flex-1">
+                <div key={location.pathname} className="page-fade">
                 <Outlet />
+                </div>
             </main>
 
             <footer className="border-t bg-white mt-16">
