@@ -24,6 +24,7 @@ import AboutPage from "./pages/public/AboutPage";
 import ContactPage from "./pages/public/ContactPage";
 import LoginPage from "./pages/public/LoginPage";
 import ProfilePage from "./pages/public/ProfilePage";
+import SignUpPage from "./pages/public/SignUpPage";
 
 const App = () => {
   return (
@@ -39,6 +40,7 @@ const App = () => {
       <Route path="/contact" element={<ContactPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/profile" element={<ProfilePage />} />
+      <Route path="/signup" element={<SignUpPage />} />
       
       </Route>
 
