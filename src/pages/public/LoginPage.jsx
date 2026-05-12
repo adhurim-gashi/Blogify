@@ -35,8 +35,8 @@ return (
                     Welcome Back
                 </p>
                 <h2 className="mt-3 text-3xl font-bold">Login to Blogify</h2>
-                <p>
-                To receive a user account, please contact an administrator.
+                <p className="mb-5">
+                Log in to manage your profile, comment on posts, and access your Blogify account.
                 </p>
             </div>
 
