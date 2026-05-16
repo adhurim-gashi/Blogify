@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
 // Wrap JWT operations to centralize secret usage and make future rotation easier
 const signAccess = (payload) => {
@@ -6,7 +7,10 @@ const signAccess = (payload) => {
 };
 
 const signRefresh = (payload) => {
-  return jwt.sign(payload, process.env.JWT_REFRESH_SECRET, { expiresIn: process.env.JWT_REFRESH_EXP || '7d' });
+  return jwt.sign(payload, process.env.JWT_REFRESH_SECRET, {
+    expiresIn: process.env.JWT_REFRESH_EXP || '7d',
+    jwtid: crypto.randomUUID(),
+  });
 };
 
 // Expose verification helpers - callers handle thrown errors and map to HTTP responses
