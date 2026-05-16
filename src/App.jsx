@@ -3,13 +3,17 @@ import AdminLayout from "./layouts/AdminLayout";
 import Dashboard from "./pages/Dashboard";
 import Posts from "./pages/Posts";
 import Categories from "./pages/Categories";
-import CreatePost from "./pages/CreatePost"; 
+import CreatePost from "./pages/CreatePost";
+import EditPost from "./pages/EditPost";
 import CreateCategory from "./pages/CreateCategory";
+import EditCategory from "./pages/EditCategory";
 import Tags from "./pages/Tags";
 import CreateTag from "./pages/CreateTag";
+import EditTag from "./pages/EditTag";
 import Comments from "./pages/Comments";
 import Pages from "./pages/Pages";
 import CreatePage from "./pages/CreatePage";
+import EditPage from "./pages/EditPage";
 import Media from "./pages/Media"; 
 import UploadMedia from "./pages/UploadMedia";
 import Newsletter from "./pages/Newsletter";
@@ -51,14 +55,18 @@ const App = () => {
       <Route path="/" element={<AdminLayout />}>
       <Route index element={<Dashboard />} />
       <Route path="posts" element={<Posts />} />
-      <Route path="categories" element={<Categories />} />
       <Route path="posts/create" element={<CreatePost />} />
+      <Route path="posts/edit/:id" element={<EditPost />} />
+      <Route path="categories" element={<Categories />} />
       <Route path="categories/create" element={<CreateCategory />} />
+      <Route path="categories/edit/:id" element={<EditCategory />} />
       <Route path="tags" element={<Tags />} />
       <Route path="tags/create" element={<CreateTag />} />
+      <Route path="tags/edit/:id" element={<EditTag />} />
       <Route path="comments" element={<Comments />} />
       <Route path="pages" element={<Pages />} />
       <Route path="pages/create" element={<CreatePage />} />
+      <Route path="pages/edit/:id" element={<EditPage />} />
       <Route path="media" element={<Media />} />
       <Route path="media/upload" element={<UploadMedia />} />
       <Route path="newsletter" element={<Newsletter />} />

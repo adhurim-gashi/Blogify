@@ -1,8 +1,10 @@
 import { NavLink, Outlet, useLocation } from "react-router";
+import { useAuth } from "../auth-context";
 
 
 const PublicLayout = () => {
 const location = useLocation();
+const { user, logout } = useAuth();
     return (
         <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
             <header className="border-b bg-white">
@@ -13,9 +15,9 @@ const location = useLocation();
                     <nav className="flex gap-6 text-sm font-medium">
                        <NavLink
                        to="/home"
-                       className={({isActive}) => 
+                       className={({isActive}) =>
                         `text-slate-700 border-b-2 pb-1 transition duration-300 ${
-                            isActive 
+                            isActive
                             ? "border-blue-500 text-blue-500"
                             : "border-transparent hover:border-blue-500 hover:text-blue-500"
                         }`
@@ -24,9 +26,9 @@ const location = useLocation();
                        </NavLink>
                        <NavLink
                        to="/about"
-                       className={({isActive}) => 
+                       className={({isActive}) =>
                         `text-slate-700 border-b-2 pb-1 transition duration-300 ${
-                            isActive 
+                            isActive
                             ? "border-blue-500 text-blue-500"
                             : "border-transparent hover:border-blue-500 hover:text-blue-500"
                         }`
@@ -35,9 +37,9 @@ const location = useLocation();
                        </NavLink>
                        <NavLink
                        to="/blog"
-                       className={({isActive}) => 
+                       className={({isActive}) =>
                         `text-slate-700 border-b-2 pb-1 transition duration-300 ${
-                            isActive 
+                            isActive
                             ? "border-blue-500 text-blue-500"
                             : "border-transparent hover:border-blue-500 hover:text-blue-500"
                         }`
@@ -46,37 +48,66 @@ const location = useLocation();
                        </NavLink>
                        <NavLink
                        to="/contact"
-                       className={({isActive}) => 
+                       className={({isActive}) =>
                         `text-slate-700 border-b-2 pb-1 transition duration-300 ${
-                            isActive 
+                            isActive
                             ? "border-blue-500 text-blue-500"
                             : "border-transparent hover:border-blue-500 hover:text-blue-500"
                         }`
                         }>
                         Contact
                        </NavLink>
-                       <NavLink
-                       to="/signup"
-                       className={({isActive}) => 
-                        `text-slate-700 border-b-2 pb-1 transition duration-300 ${
-                            isActive 
-                            ? "border-blue-500 text-blue-500"
-                            : "border-transparent hover:border-blue-500 hover:text-blue-500"
-                        }`
-                        }>
-                        Sign Up
-                       </NavLink>
-                       <NavLink
-                       to="/login"
-                       className={({isActive}) => 
-                        `text-slate-700 border-b-2 pb-1 transition duration-300 ${
-                            isActive 
-                            ? "border-blue-500 text-blue-500"
-                            : "border-transparent hover:border-blue-500 hover:text-blue-500"
-                        }`
-                        }>
-                        Login
-                       </NavLink>
+                       {user ? (
+                        <>
+                         <NavLink
+                         to="/profile"
+                         className={({isActive}) =>
+                          `text-slate-700 border-b-2 pb-1 transition duration-300 ${
+                              isActive
+                              ? "border-blue-500 text-blue-500"
+                              : "border-transparent hover:border-blue-500 hover:text-blue-500"
+                          }`
+                          }>
+                          Profile
+                         </NavLink>
+                         <NavLink
+                         to="/"
+                         className="text-slate-700 border-b-2 border-transparent pb-1 transition duration-300 hover:border-blue-500 hover:text-blue-500">
+                          Dashboard
+                         </NavLink>
+                         <button
+                         type="button"
+                         onClick={logout}
+                         className="text-slate-700 border-b-2 border-transparent pb-1 transition duration-300 hover:border-blue-500 hover:text-blue-500">
+                          Logout
+                         </button>
+                        </>
+                       ) : (
+                        <>
+                         <NavLink
+                         to="/signup"
+                         className={({isActive}) =>
+                          `text-slate-700 border-b-2 pb-1 transition duration-300 ${
+                              isActive
+                              ? "border-blue-500 text-blue-500"
+                              : "border-transparent hover:border-blue-500 hover:text-blue-500"
+                          }`
+                          }>
+                          Sign Up
+                         </NavLink>
+                         <NavLink
+                         to="/login"
+                         className={({isActive}) =>
+                          `text-slate-700 border-b-2 pb-1 transition duration-300 ${
+                              isActive
+                              ? "border-blue-500 text-blue-500"
+                              : "border-transparent hover:border-blue-500 hover:text-blue-500"
+                          }`
+                          }>
+                          Login
+                         </NavLink>
+                        </>
+                       )}
                     </nav>
                 </div>
             </header>

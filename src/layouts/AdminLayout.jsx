@@ -1,7 +1,21 @@
-import { Outlet } from "react-router";
-import { NavLink } from "react-router";
+import { Navigate, NavLink, Outlet } from "react-router";
+import { useAuth } from "../auth-context";
 
 const AdminLayout = () => {
+  const { user, isLoading, logout } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-100 text-slate-600">
+        Loading...
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
   return (
     <div className="flex h-screen">
       <aside className="hidden md:block w-64 bg-slate-900 text-white p-4">
@@ -139,6 +153,15 @@ const AdminLayout = () => {
 
           </ul>
         </nav>
+        <div className="mt-8 border-t border-slate-700 pt-4 text-sm text-slate-300">
+          <p className="truncate">{user.name || user.username || user.email}</p>
+          <button
+            onClick={logout}
+            className="mt-3 w-full rounded-md bg-slate-800 px-3 py-2 text-left text-white hover:bg-slate-700"
+          >
+            Logout
+          </button>
+        </div>
       </aside>
 
       <main className="flex-1 bg-slate-100 p-6">
