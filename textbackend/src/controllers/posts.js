@@ -2,18 +2,38 @@ const prisma = require('../utils/prisma');
 const { makeSlug } = require('../utils/slugify');
 const sanitizeHtml = require('sanitize-html');
 
+async function makeUniquePostSlug(value, currentId) {
+  const base = makeSlug(value) || 'post';
+  let slug = base;
+  let index = 1;
+  while (true) {
+    const existing = await prisma.post.findUnique({ where: { slug } });
+    if (!existing || existing.id === currentId) return slug;
+    slug = `${base}-${index++}`;
+  }
+}
+
 async function list(req, res, next) {
   try {
     const { page = 1, perPage = 10, q } = req.validated || req.query;
     const take = parseInt(perPage);
     const skip = (parseInt(page) - 1) * take;
     const where = { deletedAt: null, AND: [] };
-    if (q) where.AND.push({ OR: [{ title: { contains: q, mode: 'insensitive' } }, { content: { contains: q, mode: 'insensitive' } }] });
+    if (q) where.AND.push({ OR: [{ title: { contains: q } }, { content: { contains: q } }] });
     const [posts, total] = await prisma.$transaction([
       prisma.post.findMany({ where, skip, take, orderBy: { createdAt: 'desc' }, include: { author: true, categories: true, tags: true } }),
       prisma.post.count({ where })
     ]);
     res.json({ success: true, data: { posts, meta: { total } } });
+  } catch (err) { next(err); }
+}
+
+async function getById(req, res, next) {
+  try {
+    const { id } = req.validated || req.params;
+    const post = await prisma.post.findUnique({ where: { id }, include: { author: true, categories: true, tags: true, media: true, comments: true } });
+    if (!post) return res.status(404).json({ success: false, error: 'Not found' });
+    res.json({ success: true, data: { post } });
   } catch (err) { next(err); }
 }
 
@@ -32,13 +52,7 @@ async function create(req, res, next) {
   try {
     const { title, content, excerpt, status, categories = [], tags = [] } = req.validated;
     const cleanContent = sanitizeHtml(content, { allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img','h1','h2','h3']), allowedAttributes: { a: ['href','name','target'], img: ['src','alt'] } });
-    const slugBase = makeSlug(title);
-    let slug = slugBase;
-    // ensure unique
-    let i = 1;
-    while (await prisma.post.findUnique({ where: { slug } })) {
-      slug = `${slugBase}-${i++}`;
-    }
+    const slug = await makeUniquePostSlug(title);
     const data = { title, content: cleanContent, excerpt, slug, status: status || 'DRAFT', authorId: req.user.id };
     const post = await prisma.post.create({ data });
     // connect categories and tags
@@ -57,10 +71,29 @@ async function create(req, res, next) {
 async function update(req, res, next) {
   try {
     const { id } = req.validated || req.params;
-    const raw = req.validated || req.body;
+    const raw = { ...(req.validated || req.body) };
+    delete raw.id;
     if (raw.content) raw.content = sanitizeHtml(raw.content, { allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img','h1','h2','h3']), allowedAttributes: { a: ['href','name','target'], img: ['src','alt'] } });
-    const data = raw;
-    const updated = await prisma.post.update({ where: { id }, data });
+
+    // Handle category and tag updates
+    const { categories, tags, ...dataToUpdate } = raw;
+    const data = dataToUpdate;
+
+    if (data.slug) {
+      data.slug = await makeUniquePostSlug(data.slug, id);
+    }
+
+    if (categories && Array.isArray(categories)) {
+      const cats = await prisma.category.findMany({ where: { id: { in: categories } } });
+      data.categories = { set: cats.map(c => ({ id: c.id })) };
+    }
+
+    if (tags && Array.isArray(tags)) {
+      const tgs = await prisma.tag.findMany({ where: { id: { in: tags } } });
+      data.tags = { set: tgs.map(t => ({ id: t.id })) };
+    }
+
+    const updated = await prisma.post.update({ where: { id }, data, include: { author: true, categories: true, tags: true } });
     res.json({ success: true, data: { post: updated } });
   } catch (err) { next(err); }
 }
@@ -73,4 +106,4 @@ async function remove(req, res, next) {
   } catch (err) { next(err); }
 }
 
-module.exports = { list, getBySlug, create, update, remove };
+module.exports = { list, getById, getBySlug, create, update, remove };

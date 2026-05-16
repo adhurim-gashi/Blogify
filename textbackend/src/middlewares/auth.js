@@ -17,7 +17,7 @@ async function requireAuth(req, res, next) {
     // Attach user to request for downstream handlers and role checks
     req.user = user;
     next();
-  } catch (err) {
+  } catch {
     // Do not leak internal errors; return standardized unauthorized response
     return res.status(401).json({ success: false, error: 'Unauthorized' });
   }

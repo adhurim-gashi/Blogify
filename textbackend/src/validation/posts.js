@@ -15,14 +15,17 @@ const listPostsSchema = z.object({
   q: z.string().max(200).optional(),
 });
 
-const slugParam = z.object({ slug: z.string().regex(/^[a-z0-9\-]+$/).min(1) });
+const slugParam = z.object({ slug: z.string().regex(/^[a-z0-9-]+$/).min(1) });
 
 const updatePostSchema = z.object({
   id: z.string().uuid(),
   title: z.string().min(1).max(300).optional(),
+  slug: z.string().regex(/^[a-z0-9-]+$/).min(1).max(200).optional(),
   content: z.string().min(1).optional(),
   excerpt: z.string().max(512).optional(),
   status: z.enum(['DRAFT','PUBLISHED','ARCHIVED']).optional(),
+  categories: z.array(z.string().uuid()).optional(),
+  tags: z.array(z.string().uuid()).optional(),
 });
 
 module.exports = { createPostSchema, listPostsSchema, slugParam, updatePostSchema };

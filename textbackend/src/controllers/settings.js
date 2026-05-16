@@ -7,7 +7,7 @@ async function list(req, res, next) {
     const { page = 1, perPage = 50, q } = req.validated || req.query;
     const take = parseInt(perPage);
     const skip = (parseInt(page) - 1) * take;
-    const where = q ? { key: { contains: q, mode: 'insensitive' } } : {};
+    const where = q ? { key: { contains: q } } : {};
     const [items, total] = await prisma.$transaction([
       prisma.setting.findMany({ where, skip, take, orderBy: { key: 'asc' } }),
       prisma.setting.count({ where })
@@ -27,7 +27,10 @@ async function create(req, res, next) {
 async function update(req, res, next) {
   try {
     const { id } = req.validated || req.params;
-    const data = req.validated || req.body;
+    const { key, value } = req.validated || req.body;
+    const data = {};
+    if (key !== undefined) data.key = key;
+    if (value !== undefined) data.value = value;
     const updated = await prisma.setting.update({ where: { id }, data });
     res.json({ success: true, data: { setting: updated } });
   } catch (err) { next(err); }

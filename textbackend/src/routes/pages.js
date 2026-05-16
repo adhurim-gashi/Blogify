@@ -8,9 +8,11 @@ const { createPageSchema, idParam, slugParam, listPagesSchema, updatePageSchema 
 const perUserRateLimit = require('../middlewares/perUserRateLimit');
 
 router.get('/', validate(listPagesSchema), pagesController.list);
+const uuidPath = '/:id([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})';
+router.get(uuidPath, validate(idParam), pagesController.getById);
 router.get('/:slug', validate(slugParam), pagesController.getBySlug);
 router.post('/', requireAuth, perUserRateLimit({ max: 30 }), requireRole('Admin','Author'), validate(createPageSchema), pagesController.create);
-router.put('/:id', requireAuth, perUserRateLimit({ max: 30 }), requireRole('Admin','Author'), validate(updatePageSchema), pagesController.update);
-router.delete('/:id', requireAuth, perUserRateLimit({ max: 30 }), requireRole('Admin'), validate(idParam), pagesController.remove);
+router.put(uuidPath, requireAuth, perUserRateLimit({ max: 30 }), requireRole('Admin','Author'), validate(updatePageSchema), pagesController.update);
+router.delete(uuidPath, requireAuth, perUserRateLimit({ max: 30 }), requireRole('Admin'), validate(idParam), pagesController.remove);
 
 module.exports = router;

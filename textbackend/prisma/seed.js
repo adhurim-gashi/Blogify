@@ -7,8 +7,8 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Seeding database...');
   const adminRole = await prisma.role.upsert({ where: { name: 'Admin' }, update: {}, create: { name: 'Admin' } });
-  const authorRole = await prisma.role.upsert({ where: { name: 'Author' }, update: {}, create: { name: 'Author' } });
-  const readerRole = await prisma.role.upsert({ where: { name: 'Reader' }, update: {}, create: { name: 'Reader' } });
+  await prisma.role.upsert({ where: { name: 'Author' }, update: {}, create: { name: 'Author' } });
+  await prisma.role.upsert({ where: { name: 'Reader' }, update: {}, create: { name: 'Reader' } });
 
   const email = process.env.SEED_ADMIN_EMAIL || 'admin@blogify.local';
   const pwd = process.env.SEED_ADMIN_PASSWORD || 'password123';

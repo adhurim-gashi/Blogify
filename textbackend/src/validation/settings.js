@@ -13,5 +13,3 @@ const updateSettingSchema = idParam.merge(settingSchema);
 const listSettingsSchema = z.object({ page: z.string().optional(), perPage: z.string().optional(), q: z.string().max(200).optional() });
 
 module.exports = { settingSchema, idParam, updateSettingSchema, listSettingsSchema };
-
-module.exports = { settingSchema, idParam, updateSettingSchema };

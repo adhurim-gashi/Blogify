@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -37,33 +37,27 @@ model Role {
 }
 
 model Post {
-  id          String     @id @default(uuid())
+  id          String   @id @default(uuid())
   title       String
-  slug        String     @unique
+  slug        String   @unique
   excerpt     String?
   content     String
-  status      PostStatus @default(DRAFT)
-  author      User       @relation(fields: [authorId], references: [id])
+  status      String   @default("DRAFT")
+  author      User     @relation(fields: [authorId], references: [id])
   authorId    String
-  categories  Category[] @relation("PostCategories", references: [id])
-  tags        Tag[]      @relation("PostTags", references: [id])
+  categories  Category[] @relation("PostCategories")
+  tags        Tag[]     @relation("PostTags")
   comments    Comment[]
-  media       Media?     @relation(fields: [mediaId], references: [id])
+  media       Media?    @relation(fields: [mediaId], references: [id])
   mediaId     String?
-  views       Int        @default(0)
-  isFeatured  Boolean    @default(false)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  views       Int       @default(0)
+  isFeatured  Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
 
   @@index([slug])
   @@index([createdAt])
-}
-
-enum PostStatus {
-  DRAFT
-  PUBLISHED
-  ARCHIVED
 }
 
 model Category {
@@ -118,6 +112,7 @@ model Media {
   height      Int?
   uploader    User?    @relation(fields: [uploaderId], references: [id])
   uploaderId  String?
+  posts       Post[]
   createdAt   DateTime @default(now())
 }
 

@@ -2,13 +2,28 @@ const prisma = require('../utils/prisma');
 
 async function stats(req, res, next) {
   try {
-    const users = await prisma.user.count();
-    const posts = await prisma.post.count({ where: { deletedAt: null } });
-    const categories = await prisma.category.count();
-    const comments = await prisma.comment.count();
-    const media = await prisma.media.count();
-    const tags = await prisma.tag.count();
-    res.json({ success: true, data: { users, posts, categories, comments, media, tags } });
+    const [totalUsers, totalPosts, totalCategories, totalComments, totalMedia, totalTags, totalSubscribers] = await Promise.all([
+      prisma.user.count({ where: { deletedAt: null } }),
+      prisma.post.count({ where: { deletedAt: null } }),
+      prisma.category.count(),
+      prisma.comment.count({ where: { deletedAt: null } }),
+      prisma.media.count(),
+      prisma.tag.count(),
+      prisma.newsletterSubscriber.count()
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        totalUsers,
+        totalPosts,
+        totalCategories,
+        totalComments,
+        totalMedia,
+        totalTags,
+        totalSubscribers
+      }
+    });
   } catch (err) { next(err); }
 }
 

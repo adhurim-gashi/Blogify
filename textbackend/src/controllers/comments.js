@@ -19,8 +19,34 @@ async function listByPost(req, res, next) {
     // Only return approved comments for public listing to enforce moderation workflow
     // Admins may need a separate endpoint to list all comments; for now, public listing is filtered
     const where = { postId, deletedAt: null, approved: true };
-    const comments = await prisma.comment.findMany({ where, orderBy: { createdAt: 'asc' } });
+    const comments = await prisma.comment.findMany({
+      where,
+      orderBy: { createdAt: 'asc' },
+      include: { author: { select: { id: true, name: true, username: true } } }
+    });
     res.json({ success: true, data: { comments } });
+  } catch (err) { next(err); }
+}
+
+async function listAll(req, res, next) {
+  try {
+    const { page = 1, perPage = 10 } = req.query;
+    const take = parseInt(perPage);
+    const skip = (parseInt(page) - 1) * take;
+
+    // Fetch all comments with related post and author info in one query
+    const [comments, total] = await prisma.$transaction([
+      prisma.comment.findMany({
+        where: { deletedAt: null },
+        include: { post: true, author: true },
+        orderBy: { createdAt: 'desc' },
+        take,
+        skip
+      }),
+      prisma.comment.count({ where: { deletedAt: null } })
+    ]);
+
+    res.json({ success: true, data: { comments, meta: { total } } });
   } catch (err) { next(err); }
 }
 
@@ -54,4 +80,4 @@ async function reject(req, res, next) {
   } catch (err) { next(err); }
 }
 
-module.exports = { create, listByPost, remove, approve, reject };
+module.exports = { create, listByPost, listAll, remove, approve, reject };

@@ -12,4 +12,4 @@ const updateCategorySchema = idParam.merge(categorySchema);
 // Implements Additional Requirements: Every list endpoint must support pagination
 const listCategoriesSchema = z.object({ page: z.string().optional(), perPage: z.string().optional(), q: z.string().max(200).optional() });
 
-module.exports = { categorySchema, idParam, updateCategorySchema };
+module.exports = { categorySchema, idParam, updateCategorySchema, listCategoriesSchema };

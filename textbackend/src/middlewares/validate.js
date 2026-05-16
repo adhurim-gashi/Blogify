@@ -6,7 +6,15 @@ function validate(schema) {
       req.validated = result;
       next();
     } catch (err) {
-      return res.status(400).json({ success: false, error: err.errors || err.message });
+      // Handle Zod validation errors
+      if (err.issues) {
+        return res.status(400).json({
+          success: false,
+          error: 'Validation failed',
+          details: err.issues
+        });
+      }
+      return res.status(400).json({ success: false, error: err.message || 'Validation failed' });
     }
   };
 }

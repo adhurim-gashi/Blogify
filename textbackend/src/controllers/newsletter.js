@@ -16,7 +16,7 @@ async function list(req, res, next) {
     const { page = 1, perPage = 50, q } = req.validated || req.query;
     const take = parseInt(perPage);
     const skip = (parseInt(page) - 1) * take;
-    const where = q ? { email: { contains: q, mode: 'insensitive' } } : {};
+    const where = q ? { email: { contains: q } } : {};
     const [subs, total] = await prisma.$transaction([
       prisma.newsletterSubscriber.findMany({ where, skip, take, orderBy: { createdAt: 'desc' } }),
       prisma.newsletterSubscriber.count({ where })
