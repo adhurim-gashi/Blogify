@@ -1,13 +1,16 @@
 import { Link } from "react-router";
 import { useState } from "react";
+import { api } from "../../api";
 
 
 const HomePage = () => {
     const [subscriberEmail, setSubscriberEmail] = useState(""); 
     const [subscriberError, setSubscriberError] = useState(""); 
+    const [subscriberMessage, setSubscriberMessage] = useState("");
 
-    const handleSubscribe = (e) => {
+    const handleSubscribe = async (e) => {
         e.preventDefault();
+        setSubscriberMessage("");
 
         if (!subscriberEmail.trim()) {
             setSubscriberError("Please enter your email address.");
@@ -19,8 +22,18 @@ const HomePage = () => {
             return
         }
 
-        setSubscriberError("")
-        console.log("Subscribed:", subscriberEmail);
+        setSubscriberError("");
+        try {
+            const res = await api.post("/newsletter/subscribe", { email: subscriberEmail }, { needsAuth: false });
+            if (res.success) {
+                setSubscriberMessage("Subscription saved successfully.");
+                setSubscriberEmail("");
+            } else {
+                setSubscriberError(res.message || res.error || "Subscription failed.");
+            }
+        } catch (err) {
+            setSubscriberError(err.message || "Subscription failed.");
+        }
     }
 
     return (
@@ -143,6 +156,11 @@ const HomePage = () => {
                 {subscriberError && (
                         <p className="text-red-500 text-sm mt-2 text-center">
                             {subscriberError}
+                        </p>
+                    )}
+                {subscriberMessage && (
+                        <p className="text-green-600 text-sm mt-2 text-center">
+                            {subscriberMessage}
                         </p>
                     )}
                 </div>

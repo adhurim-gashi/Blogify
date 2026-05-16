@@ -1,56 +1,98 @@
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import { useState } from "react";
+import { api } from "../api";
 
 const CreateTag = () => {
-    return (
-        <div>
-            <h1 className="text-3xl font-bold">Add Tag</h1>
-            <p className="mt-2 text-slate-600">
-                Create a new tag to help organize and filter blog posts.
-            </p>
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({ name: "" });
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError("");
+  };
 
-            <div className="bg-white rounded-xl shadow p-6 mt-6">
-                <form className="space-y-5">
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">
-                            Tag Name
-                        </label>
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-                        <input 
-                        type="text"
-                        placeholder="Enter tag name"
-                        className="w-full border border-slate-300 rounded-md px-4 y-2 outline-none focus:ring-2 focus:ring-blue-500"
-                        />
+    if (!formData.name.trim()) {
+      setError("Tag name is required");
+      return;
+    }
 
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
-                                Slug
-                            </label>
-                            <input 
-                            type="text"
-                            placeholder="tag-slug"
-                            className="w-full border border-slate-300 rounded-md px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                        </div>
+    setLoading(true);
+    setMessage("");
 
-                        <div className="flex gap-3 pt-2">
-                            <Link 
-                            to="/tags"
-                            className="px-4 py-2 rounded-md border border-slate-300 text-slate-700">
-                                Cancel
-                            </Link>
+    try {
+      const res = await api.post("/tags", { name: formData.name });
+      if (res.success) {
+        setMessage("Tag created successfully!");
+        setTimeout(() => navigate("/tags"), 1500);
+      } else {
+        setMessage(res.error || "Failed to create tag");
+      }
+    } catch (err) {
+      setMessage(err.message || "Error creating tag");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-                            <button 
-                            type="submit" className="px-4 py-2 rounded-md bg-blue-500 text-white">
-                                Save Tag
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    )
-}
+  return (
+    <div>
+      <h1 className="text-3xl font-bold">Add Tag</h1>
+      <p className="mt-2 text-slate-600">
+        Create a new tag to help organize and filter blog posts.
+      </p>
 
+      <div className="bg-white rounded-xl shadow p-6 mt-6">
+        {message && (
+          <div className={`mb-4 p-3 rounded-md text-sm ${
+            message.includes("successfully")
+              ? "bg-green-100 text-green-700"
+              : "bg-red-100 text-red-700"
+          }`}>
+            {message}
+          </div>
+        )}
+
+        <form className="space-y-5" onSubmit={handleSubmit}>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              Tag Name *
+            </label>
+            <input
+              type="text"
+              name="name"
+              placeholder="Enter tag name"
+              value={formData.name}
+              onChange={handleChange}
+              className="w-full border border-slate-300 rounded-md px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+          </div>
+
+          <div className="flex gap-3 pt-2">
+            <Link
+              to="/tags"
+              className="px-4 py-2 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50"
+            >
+              Cancel
+            </Link>
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-4 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? "Creating..." : "Create Tag"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
 
 export default CreateTag;

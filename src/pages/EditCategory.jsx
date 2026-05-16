@@ -1,17 +1,30 @@
-import { Link, useNavigate } from "react-router";
-import { useState } from "react";
+import { Link, useNavigate, useParams } from "react-router";
+import { useState, useEffect } from "react";
 import { api } from "../api";
 
-const CreatePage = () => {
+const EditCategory = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    title: "",
-    content: "",
-  });
-
-  const [loading, setLoading] = useState(false);
+  const { id } = useParams();
+  const [formData, setFormData] = useState({ name: "" });
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    api.get(`/categories/${id}`)
+      .then(res => {
+        if (res.success && res.data.category) {
+          setFormData({ name: res.data.category.name });
+        }
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Failed to load category:", err);
+        setMessage("Failed to load category");
+        setLoading(false);
+      });
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -23,8 +36,7 @@ const CreatePage = () => {
 
   const validate = () => {
     const newErrors = {};
-    if (!formData.title.trim()) newErrors.title = "Title is required";
-    if (!formData.content.trim()) newErrors.content = "Content is required";
+    if (!formData.name.trim()) newErrors.name = "Category name is required";
     return newErrors;
   };
 
@@ -37,32 +49,39 @@ const CreatePage = () => {
       return;
     }
 
-    setLoading(true);
+    setSubmitting(true);
     setMessage("");
 
     try {
-      const res = await api.post("/pages", formData);
+      const res = await api.put(`/categories/${id}`, { name: formData.name });
+
       if (res.success) {
-        setMessage("Page created successfully!");
-        setTimeout(() => navigate("/pages"), 1500);
+        setMessage("Category updated successfully!");
+        setTimeout(() => navigate("/categories"), 1500);
       } else {
-        setMessage(res.error || "Failed to create page");
+        setMessage(res.error || "Failed to update category");
       }
     } catch (err) {
-      setMessage(err.message || "Error creating page");
+      setMessage(err.message || "Error updating category");
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-12">
+        <p className="text-slate-500">Loading category...</p>
+      </div>
+    );
+  }
+
   return (
     <div>
-      <h1 className="text-3xl font-bold">Add Page</h1>
-      <p className="mt-2 text-slate-600">
-        Create a static page, such as About, Contact etc.
-      </p>
+      <h1 className="text-3xl font-bold">Edit Category</h1>
+      <p className="mt-2 text-slate-600">Update this category.</p>
 
-      <div className="bg-white rounded-xl shadow p-6 mt-6">
+      <div className="bg-white rounded-xl shadow p-6 mt-6 max-w-md">
         {message && (
           <div className={`mb-4 p-3 rounded-md text-sm ${
             message.includes("successfully")
@@ -76,48 +95,32 @@ const CreatePage = () => {
         <form className="space-y-5" onSubmit={handleSubmit}>
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              Page Title *
+              Category Name *
             </label>
-
             <input
               type="text"
-              name="title"
-              placeholder="Enter page title"
-              value={formData.title}
+              name="name"
+              placeholder="Enter category name"
+              value={formData.name}
               onChange={handleChange}
               className="w-full border border-slate-300 rounded-md px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
             />
-            {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              Content *
-            </label>
-            <textarea
-              name="content"
-              rows="8"
-              placeholder="Write page content here..."
-              value={formData.content}
-              onChange={handleChange}
-              className="w-full border border-slate-300 rounded-md px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            {errors.content && <p className="text-red-500 text-sm mt-1">{errors.content}</p>}
+            {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
           </div>
 
           <div className="flex gap-3 pt-2">
             <Link
-              to="/pages"
+              to="/categories"
               className="px-4 py-2 rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50"
             >
               Cancel
             </Link>
             <button
               type="submit"
-              disabled={loading}
+              disabled={submitting}
               className="px-4 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? "Saving..." : "Save Page"}
+              {submitting ? "Saving..." : "Save Changes"}
             </button>
           </div>
         </form>
@@ -126,4 +129,4 @@ const CreatePage = () => {
   );
 };
 
-export default CreatePage;
+export default EditCategory;
