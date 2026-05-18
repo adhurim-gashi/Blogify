@@ -7,12 +7,21 @@ const location = useLocation();
 const { user, logout } = useAuth();
     return (
         <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
-            <header className="border-b bg-white">
+            <header className="sticky top-0 z-50 border-b bg-white">
                 <div className="mx-auto max-w-6xl px-6 py-4 flex items-center justify-between">
-                    <h1 className="text-2xl font-bold">Blogify</h1>
+                 
+                <NavLink to="/home" className="flex shrink-0 items-center gap-1">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500 text-lg font-bold text-white shadow-sm">
+                        B
+                    </span>
+                    <span className="text-2xl font-extrabold tracking-tight text-slate-900">
+                        log<span className="text-blue-500">ify</span>
+                    </span>
+                </NavLink>
 
 
-                    <nav className="flex gap-6 text-sm font-medium">
+                    <nav className="flex gap-6 text-sm font-medium"
+                    >
                        <NavLink
                        to="/home"
                        className={({isActive}) =>
