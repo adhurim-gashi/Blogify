@@ -1,7 +1,32 @@
 import { Link } from "react-router";
 import { useState } from "react";
-import { api } from "../../api";
+import { api } from "../../api"; 
 
+const featuredPosts = [
+    {
+        category: "Publishing",
+        title: "How to Plan Your First Blog Post", 
+        description: "Learn how to turn an idea into a clear, organized article that readers will actually want to finish", 
+        meta: "Blogify Team · 5 min read", 
+        path: "/blog"
+    },
+    {
+        category: "Design", 
+        title: "Creating a Better Reading Experience", 
+        description: 
+        "Simple layout, strong typography, and clean structure can make your blog feel more professional.",
+        meta: "Editor Notes · 4 min read.",
+        path: "/blog",
+    }, 
+    {
+        category: "Writing", 
+        title: "Writing Content That Feels Useful", 
+        description: 
+        "Practical tips for writing posts that are easier to read easier to share, and easier to manage.", 
+        meta: "Content Guide · 6 min read", 
+        path: "/blog", 
+    },
+]; 
 
 const HomePage = () => {
     const [subscriberEmail, setSubscriberEmail] = useState(""); 
@@ -9,166 +34,229 @@ const HomePage = () => {
     const [subscriberMessage, setSubscriberMessage] = useState("");
 
     const handleSubscribe = async (e) => {
-        e.preventDefault();
-        setSubscriberMessage("");
+        e.preventDefault(); 
+        setSubscriberMessage(""); 
 
         if (!subscriberEmail.trim()) {
-            setSubscriberError("Please enter your email address.");
+            setSubscriberError("Please enter your email address."); 
             return; 
         }
 
         if (!subscriberEmail.includes("@")) {
-            setSubscriberError("Please enter a valid email address."); 
-            return
+            setSubscriberError("Please enter a valid email address.");
+            return; 
         }
 
-        setSubscriberError("");
+        setSubscriberError(""); 
+
         try {
-            const res = await api.post("/newsletter/subscribe", { email: subscriberEmail }, { needsAuth: false });
+            const res = await api.post(
+                "/newsletter/subscribe", 
+                { email: subscriberEmail }, 
+                { needsAuth: false }
+            ); 
+
             if (res.success) {
-                setSubscriberMessage("Subscription saved successfully.");
+                setSubscriberMessage("You have successfully joined the newsletter."); 
                 setSubscriberEmail("");
             } else {
-                setSubscriberError(res.message || res.error || "Subscription failed.");
+                setSubscriberError(res.message || res.error || "Subscription failed.")
             }
         } catch (err) {
             setSubscriberError(err.message || "Subscription failed.");
         }
-    }
+    }; 
 
     return (
-            <>
-                <section className="mx-auto max-w-6xl px-6 py-16">
-                    <div className="max-w-3xl">
-                        <p className="text-sm font-semibold uppercase tracking-wide text-blue-500">
-                            Modern CMS Blog Platform
-                        </p>
-                        <h2 className="mt-4 text-5xl font-bold leading-tight">Share ideas, publish stories, and manage your content with ease</h2>
-                        <p className="mt-6 text-lg text-slate-600">
-                            Blogify is a modern blog content management system built for writing, organizing, and publishing articles with categories, tags, comments, and media management.
-                        </p>
+        <>
+        <section className="mx-auto max-w-6xl px-6 py-16">
+            <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
+                <div>
+                    <p className="text-sm font-semibold uppercase tracking-wide text-blue-500">
+                        Blogify Publishing Platform
+                    </p>
+                    <h2 className="mt-4 text-5xl font-bold leading-tight">
+                        Write, organize, and publish stories from one simple workspace
+                    </h2>
+                    
+                    <p className="mt-6 text-lg text-slate-600">
+                        Blogify helps writers, editors, and creators manage articles, categories, tags, comments, and media in a clean publishing experience. 
+                    </p>
 
-                        <div className="mt-8 flex gap-4">
-                            <Link
-                            to="/blog"
-                            className="bg-blue-500 text-white px-5 py-3 rounded-md font-medium hover:bg-blue-600 transition duration-300"
-                            >
-                                Explore Blog
-                            </Link>
-                            <Link
-                            to="/about"
-                            className="bg-blue-500 text-white px-5 py-3 rounded-md font-medium hover:bg-blue-600 transition duration-300"
-                            >
-                                Learn More
-                            </Link>
+                    <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                        <Link 
+                        to="/blog"
+                        className="rounded-md bg-blue-500 px-5 py-4 text-center font-medium text-white transition duration-300 hover:bg-blue-600">
+                            Explore Articles
+                        </Link>
+
+                        <Link 
+                        to="/about"
+                        className="rounded-md border border-blue-100 bg-blue-50 px-5 py-4 text-center font-medium text-blue-600 transition duration-300 hover:border-blue-500 hover:bg-blue-100">
+                            About Blogify
+                        </Link>
+                    </div>
+                </div>
+                <div className="rounded-lg border border-slate-200 bg-white p-5 shadow">
+                    <div className="flex items-center justify-between border-b border-slate-200">
+                        <div>
+                            <p className="text-sm font-semibold text-slate-900">
+                                Publishing Overview
+                            </p>
+                            <p className="text-sm text-slate-500">
+                                Today on Blogify
+                            </p>
+                        </div>
+                        <span className="rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-600">Live</span>
+                    </div>
+
+                    <div className="mt-5 grid grid-cols-3 gap-3">
+                        <div className="rounded-md bg-slate-50 p-4">
+                            <p className="text-2xl font-bold text-slate-900">24</p>
+                            <p className="mt-1 text-xs text-slate-500">Posts</p>
+                        </div>
+
+                        <div className="rounded-md bg-slate-50 p-4">
+                            <p className="text-2xl font-bold text-slate-900">8</p>
+                            <p className="mt-1 text-xs text-slate-500">Categories</p>
+                        </div>
+                        <div className="rounded-md bg-slate-50 p-4">
+                            <p className="text-2xl font-bold text-slate-900">132</p>
+                            <p className="mt-1 text-xs text-slate-500">Readers</p>
                         </div>
                     </div>
-                  </section>
 
-                <section className="mx-auto max-w-6xl px-6 pb-16">
-                    <h3 className="text-2xl font-bold mb-6">Featured Posts</h3>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <article className="bg-white rounded-xl shadow p-5">
-                            <p className="text-sm text-blue-500 font-medium">Technology</p>
-                            <h4 className="mt-3 text-xl font-semibold">
-                                How to Build a Blog CMS
-                            </h4>
-                            <p className="mt-3 text-slate-600">
-                                Learn the core structure of building a CMS with posts, categories, tags, comments, and media.
+                    <div className="mt-5 space-y-3">
+                        <div className="rounded-md border border-slate-200 p-4">
+                            <p className="text-sm font-semibold text-slate-900">
+                                How to Build Better Blog Content
                             </p>
-                        </article>
-
-
-                        <article className="bg-white rounded-xl shadow p-5">
-                            <p className="text-sm text-blue-500 font-medium">Design</p>
-                            <h4 className="mt-3 text-xl font-semibold">
-                                UI Trends in 2026
-                            </h4>
-
-                            <p className="mt-3 text-slate-600">
-                                Explore modern interface ideas, clean layouts, and user-friendly design patterns for web apps.
+                            <p className="mt-1 text-sm text-slate-500">
+                                Draft · Writing · 6 min read
                             </p>
-                        </article>
+                        </div>
 
-
-                        <article className="bg-white rounded-xl shadow p-5">
-                            <p className="text-sm text-blue-500 font-medium">Productivity</p>
-                            <h4 className="mt-3 text-xl font-semibold">
-                                Writing Better Blog Content
-                            </h4>
-
-                            <p className="mt-3 text-slate-600">
-                                Tips for planning, structuring, and publishing more useful content for your readers.
+                        <div className="rounded-md border border-slate-200 p-4">
+                            <p className="text-sm font-semibold text-slate-900">
+                                A Cleaner Way to Manage Posts
                             </p>
-                        </article>
-                    </div>
-                </section>
 
-                <section className="bg-white border-t">
-                    <div className="mx-auto max-w-6xl px-6 py-16">
-                        <h3 className="text-2xl font-bold">Why Blogify?</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-                            <div className="rounded-xl border p-5">
-                                <h4 className="font-semibold text-lg">Content Management</h4>
-                                <p className="mt-2 text-slate-600">
-                                    Create, edit, organize, and publish blog content through a clean admin panel.
-                                </p>
-                            </div>
-
-                            <div className="rounded-xl border p-5">
-                                <h4 className="font-semibold text-lg">Reader Interaction</h4>
-                                <p className="mt-2 text-slate-600">Manage comments, encourage engagement, and keep communication active.</p>
-                            </div>
-
-                            <div className="rounded-xl border p-5">
-                                <h4 className="font-semibold text-lg">Flexible Publishing</h4>
-                                <p className="mt-2 text-slate-600">
-                                    Use categories, tags, pages, and media to build a complete publishing platform
-                                </p>
-                            </div>
+                            <p className="mt-1 text-sm text-slate-500">
+                                Published · CMS · 4 min read
+                            </p>
                         </div>
                     </div>
-                </section>
+                </div>
+            </div>
+        </section>
 
+        <section className="mx-auto max-w-6xl px-6 pb-16">
+            <h3 className="mb-6 text-2xl font-bold">Featured Reads</h3>
             
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                {featuredPosts.map((post) => (
+                    <Link 
+                    key={post.title}
+                    to={post.path}
+                    className="rounded-lg bg-white p-5 shadow transition duration-300 hover:-translate-y-1 hover:shadow-lg"
+                    >
+                        <p className="text-sm font-medium text-blue-500">
+                            {post.category}
+                        </p>
+                        <h4 className="mt-3 text-xl font-semibold text-slate-900">
+                            {post.title}
+                        </h4>
 
+                        <p className="mt-3 text-slate-600">
+                            {post.description}
+                        </p>
 
-            <section className="bg-white border-t">
+                        <p className="mt-4 text-sm text-slate-400">
+                            {post.meta}
+                        </p>
+                    </Link>
+                ))}
+            </div>
+        </section>
+
+        <div className="border-t bg-white">
+            <div className="mx-auto max-w-6xl px-6 py-16">
+                <h3 className="text-2xl font-bold">Why Choose Blogify?</h3>
+
+                <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
+                    <div className="rounded-lg border p-5">
+                        <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-md bg-blue-50 font-bold text-blue-500">
+                            P
+                        </div>
+                        <h4 className="text-lg font-semibold">Organized Publishing</h4>
+                        <p className="mt-2 text-slate-600">
+                            Keep posts, categories, tags, pages, and media organized in one simple content system.
+                        </p>
+                    </div>
+
+                    <div className="rounded-lg border p-5">
+                        <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-md bg-blue-50 font-bold text-blue-500">
+                            R
+                        </div>
+                        <h4 className="text-lg font-semibold">Reader Engagement</h4>
+                        <p className="mt-2 text-slate-600">
+                            Support comments, conversations, and community interaction around every published article.
+                        </p>
+                    </div>
+                    <div className="rounded-lg border p-5">
+                        <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-md bg-blue-50 font-bold text-blue-500">
+
+                            C
+                        </div>
+                        <h4 className="text-lg font-semibold">Flexible Content Tools</h4>
+                        <p className="mt-2 text-slate-600">
+                            Manage blog posts, static pages, newsletter subscribers, and media without switching tools.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div className="border-t bg-blue-50">
                 <div className="mx-auto max-w-6xl px-6 py-16 text-center">
-                    <h3 className="text-2xl font-bold">Stay Updated</h3>
-                    <p className="mt-3 text-slate-600">Subscribe to receive the latest posts and updates from Blogify.</p>
-                    <form className="mt-6 flex flex-col sm:flex-row gap-3 justify-center"
+                    <h3 className="text-2xl font-bold">Join the Blogify Newsletter</h3>
+                    <p className="mt-3 text-slate-600">
+                        Get fresh articles, writing tips, and platform updates delivered to your inbox.
+                    </p>
+
+                    <form
+                    className="mt-6 flex flex-col justify-center gap-3 sm:flex-row"
                     onSubmit={handleSubscribe}
                     >
-                        
-                    <input 
-                    type="email"
-                    placeholder="Enter your email"
-                    value={subscriberEmail}
-                    onChange={(e) => setSubscriberEmail(e.target.value)}
-                    className="border border-slate-300 rounded-md px-4 py-3 w-full sm:w-80 outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                    />
-                   
-                    <button type="submit" className="bg-blue-500 text-white px-5 py-3 rounded-md font-medium hover:bg-blue-600 transition duration-300">Subscribe</button>
-                   
-                </form>
-                {subscriberError && (
-                        <p className="text-red-500 text-sm mt-2 text-center">
+                        <input 
+                        type="email"
+                        placeholder="Enter your email address"
+                        value={subscriberEmail}
+                        onChange={(e) => setSubscriberEmail(e.target.value)}
+                        className="w-full rounded-md border border-slate-300 bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 sm:w-80"
+                        />
+
+                        <button
+                        type="submit" 
+                        className="rounded-md bg-blue-500 px-5 py-3 font-medium text-white transition duration-300 hover:bg-blue-600"
+                        >
+                            Subscribe Now
+                        </button>
+                    </form>
+                    {subscriberError && (
+                        <p className="mt-2 text-center text-sm text-red-500">
                             {subscriberError}
                         </p>
                     )}
-                {subscriberMessage && (
-                        <p className="text-green-600 text-sm mt-2 text-center">
+
+                    {subscriberMessage && (
+                        <p className="mt-2 text-center text-sm text-green-600">
                             {subscriberMessage}
                         </p>
                     )}
                 </div>
-
-               
-            </section>
-
-            </>
+            </div>
+        </div>
+        </>
     )
 }
 
