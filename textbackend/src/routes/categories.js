@@ -11,6 +11,6 @@ router.get('/', validate(listCategoriesSchema), categoriesController.list);
 router.get('/:id', validate(idParam), categoriesController.getById);
 router.post('/', requireAuth, requireRole('Admin','Author'), validate(categorySchema), categoriesController.create);
 router.put('/:id', requireAuth, perUserRateLimit({ max: 30 }), requireRole('Admin','Author'), validate(updateCategorySchema), categoriesController.update);
-router.delete('/:id', requireAuth, requireRole('Admin'), validate(idParam), categoriesController.remove);
+router.delete('/:id', requireAuth, requireRole('Admin','Author'), validate(idParam), categoriesController.remove);
 
 module.exports = router;

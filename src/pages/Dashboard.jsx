@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import api from "../api"; // adjust if your api.js uses named export
+import api from "../api";
 
 const Dashboard = () => {
   const [stats, setStats] = useState(null);

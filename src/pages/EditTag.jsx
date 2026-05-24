@@ -20,8 +20,7 @@ const EditTag = () => {
         setLoading(false);
       })
       .catch(err => {
-        console.error("Failed to load tag:", err);
-        setMessage("Failed to load tag");
+        setMessage(err.message || "Failed to load tag");
         setLoading(false);
       });
   }, [id]);

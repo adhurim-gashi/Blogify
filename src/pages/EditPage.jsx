@@ -31,8 +31,7 @@ const EditPage = () => {
           });
         }
       } catch (err) {
-        console.error("Failed to load page:", err);
-        setMessage("Failed to load page. Please try again.");
+        setMessage(err.message || "Failed to load page. Please try again.");
       } finally {
         setLoading(false);
       }

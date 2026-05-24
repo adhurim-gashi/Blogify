@@ -51,8 +51,7 @@ const EditPost = () => {
         setLoading(false);
       })
       .catch(err => {
-        console.error("Failed to load post:", err);
-        setMessage("Failed to load post. Please try again.");
+        setMessage(err.message || "Failed to load post. Please try again.");
         setLoading(false);
       });
   }, [id]);

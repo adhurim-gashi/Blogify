@@ -16,11 +16,12 @@ const CreatePost = () => {
   const [categories, setCategories] = useState([]);
   const [tags, setTags] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [formLoading, setFormLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState({});
 
-  // Load categories on mount
   useEffect(() => {
+    setFormLoading(true);
     Promise.all([
       api.get("/categories?perPage=100"),
       api.get("/tags?perPage=100")
@@ -33,7 +34,8 @@ const CreatePost = () => {
           setTags(tagRes.data.tags);
         }
       })
-      .catch(err => console.error("Failed to load form data:", err));
+      .catch(err => setMessage(err.message || "Failed to load categories and tags."))
+      .finally(() => setFormLoading(false));
   }, []);
 
   const handleChange = (e) => {
@@ -150,9 +152,10 @@ const CreatePost = () => {
                 name="categoryId"
                 value={formData.categoryId}
                 onChange={handleChange}
+                disabled={formLoading}
                 className="w-full border border-slate-300 rounded-md px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="">Select a category</option>
+                <option value="">{formLoading ? "Loading categories..." : "Select a category"}</option>
                 {categories.map(cat => (
                   <option key={cat.id} value={cat.id}>
                     {cat.name}
@@ -187,6 +190,7 @@ const CreatePost = () => {
               multiple
               value={formData.tagIds}
               onChange={handleChange}
+              disabled={formLoading}
               className="w-full border border-slate-300 rounded-md px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
             >
               {tags.map(tag => (

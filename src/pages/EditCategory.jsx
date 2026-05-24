@@ -20,8 +20,7 @@ const EditCategory = () => {
         setLoading(false);
       })
       .catch(err => {
-        console.error("Failed to load category:", err);
-        setMessage("Failed to load category");
+        setMessage(err.message || "Failed to load category");
         setLoading(false);
       });
   }, [id]);

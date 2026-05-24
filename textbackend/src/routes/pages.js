@@ -13,6 +13,6 @@ router.get(uuidPath, validate(idParam), pagesController.getById);
 router.get('/:slug', validate(slugParam), pagesController.getBySlug);
 router.post('/', requireAuth, perUserRateLimit({ max: 30 }), requireRole('Admin','Author'), validate(createPageSchema), pagesController.create);
 router.put(uuidPath, requireAuth, perUserRateLimit({ max: 30 }), requireRole('Admin','Author'), validate(updatePageSchema), pagesController.update);
-router.delete(uuidPath, requireAuth, perUserRateLimit({ max: 30 }), requireRole('Admin'), validate(idParam), pagesController.remove);
+router.delete(uuidPath, requireAuth, perUserRateLimit({ max: 30 }), requireRole('Admin','Author'), validate(idParam), pagesController.remove);
 
 module.exports = router;

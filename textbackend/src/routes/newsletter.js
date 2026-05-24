@@ -8,9 +8,8 @@ const { idParam } = require('../validation/common');
 const perUserRateLimit = require('../middlewares/perUserRateLimit');
 
 router.post('/subscribe', validate(subscribeSchema), newsletterController.subscribe);
-router.get('/subscribers', requireAuth, requireRole('Admin'), validate(listSubscribersSchema), newsletterController.list);
+router.get('/subscribers', requireAuth, requireRole('Admin','Author'), validate(listSubscribersSchema), newsletterController.list);
 
-// Remove subscriber (Admin only)
-router.delete('/subscribers/:id', requireAuth, requireRole('Admin'), perUserRateLimit({ max: 10 }), validate(idParam), newsletterController.remove);
+router.delete('/subscribers/:id', requireAuth, requireRole('Admin','Author'), perUserRateLimit({ max: 10 }), validate(idParam), newsletterController.remove);
 
 module.exports = router;
