@@ -41,10 +41,8 @@ async function register(req, res, next) {
     const uniqueUsername = await makeUniqueUsername(requestedUsername);
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) return res.status(400).json({ success: false, error: 'User exists' });
-    let role = await prisma.role.findUnique({ where: { name: 'Author' } });
-    if (!role) {
-      role = await prisma.role.upsert({ where: { name: 'Author' }, update: {}, create: { name: 'Author' } });
-    }
+    // Public registration is reader-only; elevated roles must be assigned through trusted admin workflows.
+    const role = await prisma.role.upsert({ where: { name: 'Reader' }, update: {}, create: { name: 'Reader' } });
     const hashed = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
       data: { email, username: uniqueUsername, password: hashed, name, roleId: role.id },

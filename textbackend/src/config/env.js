@@ -13,6 +13,7 @@ const envSchema = z.object({
   PORT: z.string().optional(),
   CORS_ORIGINS: z.string().optional(),
   MAX_UPLOAD_SIZE: z.string().optional(),
+  RATE_LIMIT_MAX: z.string().optional(),
 });
 
 // Parse and validate process.env
@@ -37,6 +38,7 @@ const config = {
   port: parseInt(raw.PORT || '4000'),
   corsOrigins: raw.CORS_ORIGINS ? raw.CORS_ORIGINS.split(',') : ['http://localhost:5173'],
   maxUploadSize: parseInt(raw.MAX_UPLOAD_SIZE || '5242880'),
+  rateLimitMax: parseInt(raw.RATE_LIMIT_MAX || '1000'),
 };
 
 module.exports = config;

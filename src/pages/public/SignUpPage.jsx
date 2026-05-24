@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router";
 import { useState } from "react";
 import { useAuth } from "../../auth-context";
+import { getPostLoginPath } from "../../auth-roles";
 
 const SignUpPage = () => {
   const navigate = useNavigate();
@@ -52,13 +53,12 @@ const SignUpPage = () => {
     if (Object.keys(newErrors).length === 0) {
       try {
         setMessage("");
-        await register({
+        const userData = await register({
           email: formData.email,
           password: formData.password,
           name: formData.fullName,
         });
-        // Redirect to admin dashboard on successful registration
-        navigate("/");
+        navigate(getPostLoginPath(userData), { replace: true });
       } catch (err) {
         setMessage(err.message || "Sign up failed. Please try again.");
       }

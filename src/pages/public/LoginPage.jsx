@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router";
 import { useState } from "react";
 import { useAuth } from "../../auth-context";
+import { getPostLoginPath } from "../../auth-roles";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -29,9 +30,8 @@ const LoginPage = () => {
     if (Object.keys(newErrors).length === 0) {
       try {
         setMessage("");
-        await login(email, password);
-        // Redirect to admin dashboard on successful login
-        navigate("/");
+        const userData = await login(email, password);
+        navigate(getPostLoginPath(userData), { replace: true });
       } catch (err) {
         setMessage(err.message || "Login failed. Please try again.");
       }

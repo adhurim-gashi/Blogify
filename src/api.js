@@ -84,53 +84,48 @@ export const apiCall = async (endpoint, options = {}) => {
     config.body = typeof body === 'string' ? body : JSON.stringify(body);
   }
 
+  let res;
   try {
-    let res;
-    try {
-      res = await fetch(url, config);
-    } catch (networkErr) {
-      // Network error (no connection, CORS issue, etc.)
-      const message = `Network error: Unable to reach ${url}. Is the backend server running on port 4000?`;
-      console.error(message, networkErr);
-      throw new Error(message);
-    }
-
-    // If 401, try to refresh token and retry once
-    if (res.status === 401 && needsAuth) {
-      try {
-        const newToken = await refreshAccessToken();
-        headers['Authorization'] = `Bearer ${newToken}`;
-        config.headers = headers;
-        res = await fetch(url, config);
-      } catch {
-        throw new Error('Authentication failed. Please login again.');
-      }
-    }
-
-    // Try to parse JSON, handle non-JSON responses
-    let data;
-    try {
-      data = normalizeResponse(await res.json());
-    } catch {
-      // Response wasn't JSON
-      if (!res.ok) {
-        throw new Error(`API Error ${res.status}: ${res.statusText}`);
-      }
-      // If OK but not JSON, return empty success
-      data = { success: true, data: {}, message: 'OK' };
-    }
-
-    // Check HTTP status
-    if (!res.ok) {
-      const errorMsg = data.message || data.error || `API Error: ${res.status}`;
-      throw new Error(errorMsg);
-    }
-
-    return data;
-  } catch (err) {
-    console.error(`[API Error] ${method} ${endpoint}:`, err.message);
-    throw err;
+    res = await fetch(url, config);
+  } catch (networkErr) {
+    // Network error (no connection, CORS issue, etc.)
+    const message = `Network error: Unable to reach ${url}. Is the backend server running on port 4000?`;
+    void networkErr;
+    throw new Error(message);
   }
+
+  // If 401, try to refresh token and retry once
+  if (res.status === 401 && needsAuth) {
+    try {
+      const newToken = await refreshAccessToken();
+      headers['Authorization'] = `Bearer ${newToken}`;
+      config.headers = headers;
+      res = await fetch(url, config);
+    } catch {
+      throw new Error('Authentication failed. Please login again.');
+    }
+  }
+
+  // Try to parse JSON, handle non-JSON responses
+  let data;
+  try {
+    data = normalizeResponse(await res.json());
+  } catch {
+    // Response wasn't JSON
+    if (!res.ok) {
+      throw new Error(`API Error ${res.status}: ${res.statusText}`);
+    }
+    // If OK but not JSON, return empty success
+    data = { success: true, data: {}, message: 'OK' };
+  }
+
+  // Check HTTP status
+  if (!res.ok) {
+    const errorMsg = data.message || data.error || `API Error: ${res.status}`;
+    throw new Error(errorMsg);
+  }
+
+  return data;
 };
 
 // Convenience methods for common HTTP verbs
@@ -152,53 +147,48 @@ export const api = {
       }
     }
 
+    let res;
     try {
-      let res;
+      res = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: formData
+      });
+    } catch (networkErr) {
+      const message = `Network error uploading to ${endpoint}. Is the server running?`;
+      void networkErr;
+      throw new Error(message);
+    }
+
+    if (res.status === 401 && needsAuth) {
       try {
+        const newToken = await refreshAccessToken();
+        headers['Authorization'] = `Bearer ${newToken}`;
         res = await fetch(url, {
           method: 'POST',
           headers,
           body: formData
         });
-      } catch (networkErr) {
-        const message = `Network error uploading to ${endpoint}. Is the server running?`;
-        console.error(message, networkErr);
-        throw new Error(message);
-      }
-
-      if (res.status === 401 && needsAuth) {
-        try {
-          const newToken = await refreshAccessToken();
-          headers['Authorization'] = `Bearer ${newToken}`;
-          res = await fetch(url, {
-            method: 'POST',
-            headers,
-            body: formData
-          });
-        } catch {
-          throw new Error('Authentication failed. Please login again.');
-        }
-      }
-
-      let data;
-      try {
-        data = normalizeResponse(await res.json());
       } catch {
-        if (!res.ok) {
-          throw new Error(`Upload failed with status ${res.status}: ${res.statusText}`);
-        }
-        data = { success: true, data: {}, message: 'OK' };
+        throw new Error('Authentication failed. Please login again.');
       }
-
-      if (!res.ok) {
-        throw new Error(data.message || data.error || `Upload failed: ${res.status}`);
-      }
-      
-      return data;
-    } catch (err) {
-      console.error(`[Upload Error] POST ${endpoint}:`, err.message);
-      throw err;
     }
+
+    let data;
+    try {
+      data = normalizeResponse(await res.json());
+    } catch {
+      if (!res.ok) {
+        throw new Error(`Upload failed with status ${res.status}: ${res.statusText}`);
+      }
+      data = { success: true, data: {}, message: 'OK' };
+    }
+
+    if (!res.ok) {
+      throw new Error(data.message || data.error || `Upload failed: ${res.status}`);
+    }
+
+    return data;
   }
 };
 

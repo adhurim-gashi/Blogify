@@ -45,7 +45,8 @@ async function get(req, res, next) {
 async function update(req, res, next) {
   try {
     const { id, email, username, name, bio } = req.validated || { id: req.params.id, ...req.body };
-    if (req.user.role.name !== 'Admin' && req.user.id !== id) {
+    const canManageUsers = ['Admin', 'Author'].includes(req.user.role.name);
+    if (!canManageUsers && req.user.id !== id) {
       return res.status(403).json({ success: false, error: 'Forbidden' });
     }
     const data = {};
