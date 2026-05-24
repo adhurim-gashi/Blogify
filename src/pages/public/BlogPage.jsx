@@ -5,6 +5,7 @@ import { api } from "../../api";
 const BlogPage = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredPosts, setFilteredPosts] = useState([]);
 
@@ -14,15 +15,16 @@ const BlogPage = () => {
 
   const loadPosts = async () => {
     setLoading(true);
+    setMessage("");
     try {
-      const res = await api.get("/posts?perPage=100");
+      const res = await api.get("/posts?perPage=100", { needsAuth: false });
       if (res.success && res.data.posts) {
         const publishedPosts = res.data.posts.filter(p => p.status === "PUBLISHED");
         setPosts(publishedPosts);
         setFilteredPosts(publishedPosts);
       }
     } catch (err) {
-      console.error("Failed to load posts:", err);
+      setMessage(err.message || "Failed to load posts.");
     } finally {
       setLoading(false);
     }
@@ -65,6 +67,12 @@ const BlogPage = () => {
           className="w-full border border-slate-300 rounded-md px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 bg-white"
         />
       </div>
+
+      {message && (
+        <div className="mt-6 rounded-md bg-red-100 p-3 text-sm text-red-700">
+          {message}
+        </div>
+      )}
 
       {loading ? (
         <div className="mt-12 text-center">

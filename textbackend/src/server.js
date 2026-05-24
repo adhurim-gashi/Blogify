@@ -20,6 +20,7 @@ const settingsRoutes = require('./routes/settings');
 const commentsRoutes = require('./routes/comments');
 const pagesRoutes = require('./routes/pages');
 const newsletterRoutes = require('./routes/newsletter');
+const homeRoutes = require('./routes/home');
 
 const { responseWrapper } = require('./middlewares/responseWrapper');
 const app = express();
@@ -28,7 +29,8 @@ const app = express();
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
 app.set('trust proxy', true);
-app.use(helmet({ contentSecurityPolicy: false }));
+// Uploaded media is served from the API origin and embedded by the frontend origin.
+app.use(helmet({ contentSecurityPolicy: false, crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 const allowed = config.corsOrigins;
 // Use CORS origin whitelist from validated config
 app.use(cors({ origin: function (origin, cb) { if (!origin) return cb(null, true); if (allowed.indexOf(origin) !== -1) return cb(null, true); return cb(new Error('Not allowed by CORS')); } }));
@@ -40,7 +42,7 @@ app.use(morgan('combined'));
 app.use(responseWrapper);
 
 // Global rate limiter for public endpoints
-const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 200 });
+const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: config.rateLimitMax });
 app.use(limiter);
 
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
@@ -56,6 +58,7 @@ app.use('/api/pages', pagesRoutes);
 app.use('/api/newsletter', newsletterRoutes);
 app.use('/api/tags', tagsRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/home', homeRoutes);
 
 app.use(errorHandler);
 
