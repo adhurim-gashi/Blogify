@@ -16,7 +16,7 @@ const AboutPage = () => {
                     Platform built for managing blog content.
                 </h2>
                 <p className="mt-6 text-lg text-slate-600">
-                    Blogify is a student project, created to manage posts, categories, tags, comments, pages, media newsletter subscribers, users, and website settings through a clean admin dashboard.
+                Blogify is a modern blogging platform built for readers and creators, bringing articles, stories, comments, and publishing tools together in one clean experience.
                 </p>
             </section>
 

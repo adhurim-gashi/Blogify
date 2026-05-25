@@ -30,6 +30,7 @@ import LoginPage from "./pages/public/LoginPage";
 import ProfilePage from "./pages/public/ProfilePage";
 import SignUpPage from "./pages/public/SignUpPage";
 import NotFoundPage from "./pages/public/NotFoundPage";
+import ForgotPasswordPage from "./pages/public/ForgotPassword";
 const App = () => {
   return (
 
@@ -46,7 +47,8 @@ const App = () => {
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/signup" element={<SignUpPage />} />
       <Route path="*" element={<NotFoundPage />} />
-      
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+
       </Route>
 
     
@@ -72,6 +74,7 @@ const App = () => {
       <Route path="newsletter" element={<Newsletter />} />
       <Route path="settings" element={<Settings />} />
       <Route path="users" element={<Users />} />
+      
       </Route>
     </Routes>
   )
