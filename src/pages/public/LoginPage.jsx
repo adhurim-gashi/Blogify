@@ -10,33 +10,39 @@ const LoginPage = () => {
   const [errors, setErrors] = useState({});
   const [message, setMessage] = useState("");
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const newErrors = {};
+ const handleSubmit = async (e) => {
+  e.preventDefault(); 
+  const newErrors = {}; 
 
-    if (!email.trim()) {
-      newErrors.email = "Email is required.";
-    }
+  if (!email.trim()) {
+    newErrors.email = "Email is required."; 
+  }
 
-    if (!password.trim()) {
-      newErrors.password = "Password is required";
-    } else if (password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters.";
-    }
+  if (!password.trim()) {
+    newErrors.password = "Password is required"; 
+  } else if (password.length < 8) {
+    newErrors.password = "Password must be at least 8 characters."; 
+  }
 
-    setErrors(newErrors);
+  setErrors(newErrors); 
 
-    if (Object.keys(newErrors).length === 0) {
-      try {
-        setMessage("");
-        await login(email, password);
-        // Redirect to admin dashboard on successful login
-        navigate("/");
-      } catch (err) {
-        setMessage(err.message || "Login failed. Please try again.");
+  if (Object.keys(newErrors).length === 0) {
+    try {
+      setMessage(""); 
+
+      const loggedInUser = await login(email, password); 
+      const role = loggedInUser?.role?.name || loggedInUser?.role; 
+
+      if (role === "Admin" || role === "Author") {
+        navigate("/"); 
+      } else {
+        navigate("/profile"); 
       }
+    } catch(err) {
+      setMessage(err.message || "Login failed. Please try again.");
     }
-  };
+  }
+ }
 
   return (
     <div className="mx-auto max-w-md px-6 py-20">

@@ -7,7 +7,7 @@ const featuredPosts = [
         category: "Publishing",
         title: "How to Plan Your First Blog Post", 
         description: "Learn how to turn an idea into a clear, organized article that readers will actually want to finish", 
-        meta: "Blogify Team · 5 min read", 
+        meta: "Editor Notes · 5 min read", 
         path: "/blog"
     },
     {
@@ -22,7 +22,7 @@ const featuredPosts = [
         category: "Writing", 
         title: "Writing Content That Feels Useful", 
         description: 
-        "Practical tips for writing posts that are easier to read easier to share, and easier to manage.", 
+        "Practical tips for writing posts that are easier to read, easier to share, and easier to manage.", 
         meta: "Content Guide · 6 min read", 
         path: "/blog", 
     },
@@ -257,7 +257,7 @@ const HomePage = () => {
             </div>
         </div>
         </>
-    )
-}
+    );
+};
 
 export default HomePage;

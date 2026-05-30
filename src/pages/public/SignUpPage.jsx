@@ -57,8 +57,8 @@ const SignUpPage = () => {
           password: formData.password,
           name: formData.fullName,
         });
-        // Redirect to admin dashboard on successful registration
-        navigate("/");
+    
+        navigate("/profile");
       } catch (err) {
         setMessage(err.message || "Sign up failed. Please try again.");
       }
