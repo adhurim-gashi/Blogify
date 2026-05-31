@@ -183,7 +183,7 @@ const HomePage = () => {
         <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-blue-500">
-              Modern CMS Blog Platform
+              Blogify Publishing Platform
             </p>
             <h2 className="mt-4 text-5xl font-bold leading-tight">
               Share ideas, publish stories, and manage your content with ease
@@ -197,7 +197,7 @@ const HomePage = () => {
                 to="/blog"
                 className="rounded-md bg-blue-500 px-5 py-3 font-medium text-white transition hover:bg-blue-600"
               >
-                Explore Blog
+                Explore Articles
               </Link>
               <a
                 href="#newsletter"

@@ -19,7 +19,7 @@ const SignUpPage = () => {
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
@@ -67,7 +67,7 @@ const SignUpPage = () => {
 
   return (
     <div className="mx-auto max-w-md px-6 py-20">
-      <div className="bg-white rounded-xl shadow p-8">
+      <div className="rounded-xl bg-white p-8 shadow">
         <div className="text-center">
           <p className="text-sm font-semibold uppercase tracking-wide text-blue-500">
             Join Blogify
@@ -79,14 +79,14 @@ const SignUpPage = () => {
         </div>
 
         {message && (
-          <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-md text-sm">
+          <div className="mt-4 rounded-md bg-red-100 p-3 text-sm text-red-700">
             {message}
           </div>
         )}
 
-        <form className="space-y-5 mt-8" onSubmit={handleSubmit}>
+        <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="mb-2 block text-sm font-medium text-slate-700">
               Full Name
             </label>
 
@@ -96,16 +96,16 @@ const SignUpPage = () => {
               placeholder="Enter your full name"
               value={formData.fullName}
               onChange={handleChange}
-              className="w-full border border-slate-300 rounded-md px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-md border border-slate-300 px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
             />
 
             {errors.fullName && (
-              <p className="text-red-500 text-sm mt-2">{errors.fullName}</p>
+              <p className="mt-2 text-sm text-red-500">{errors.fullName}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="mb-2 block text-sm font-medium text-slate-700">
               Email Address
             </label>
 
@@ -115,16 +115,16 @@ const SignUpPage = () => {
               placeholder="Enter your email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full border border-slate-300 rounded-md px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-md border border-slate-300 px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
             />
 
             {errors.email && (
-              <p className="text-red-500 text-sm mt-2">{errors.email}</p>
+              <p className="mt-2 text-sm text-red-500">{errors.email}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Password</label>
+            <label className="mb-2 block text-sm font-medium text-slate-700">Password</label>
 
             <input
               type="password"
@@ -132,16 +132,16 @@ const SignUpPage = () => {
               placeholder="Create a password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full border border-slate-300 rounded-md px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-md border border-slate-300 px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
             />
 
             {errors.password && (
-              <p className="text-red-500 text-sm mt-2">{errors.password}</p>
+              <p className="mt-2 text-sm text-red-500">{errors.password}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="mb-2 block text-sm font-medium text-slate-700">
               Confirm Password
             </label>
 
@@ -151,11 +151,11 @@ const SignUpPage = () => {
               placeholder="Confirm your password"
               value={formData.confirmPassword}
               onChange={handleChange}
-              className="w-full border border-slate-300 rounded-md px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-md border border-slate-300 px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
             />
 
             {errors.confirmPassword && (
-              <p className="text-red-500 text-sm mt-2">
+              <p className="mt-2 text-sm text-red-500">
                 {errors.confirmPassword}
               </p>
             )}
@@ -164,16 +164,16 @@ const SignUpPage = () => {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-blue-500 text-white px-5 py-3 rounded-md font-medium hover:bg-blue-600 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full rounded-md bg-blue-500 px-5 py-3 font-medium text-white transition duration-300 hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isLoading ? "Creating Account..." : "Create Account"}
           </button>
 
-          <p className="mt-6 text-sm text-slate-600 text-center">
-            Already have an account? {" "}
+          <p className="mt-6 text-center text-sm text-slate-600">
+            Already have an account?{" "}
             <Link
               to="/login"
-              className="text-blue-500 font-medium hover:text-blue-600 transition duration-300"
+              className="font-medium text-blue-500 transition duration-300 hover:text-blue-600"
             >
               Login
             </Link>

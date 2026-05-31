@@ -71,8 +71,13 @@ const PublicLayout = () => {
     <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
       <header className="sticky top-0 z-40 border-b bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
-          <NavLink to="/home" className="text-2xl font-bold">
-            Blogify
+          <NavLink to="/home" className="flex shrink-0 items-center gap-1" onClick={() => setIsMenuOpen(false)}>
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500 text-lg font-bold text-white shadow-sm">
+              B
+            </span>
+            <span className="text-2xl font-extrabold tracking-tight text-slate-900">
+              log<span className="text-blue-500">ify</span>
+            </span>
           </NavLink>
 
           <nav className="hidden items-center gap-6 md:flex" aria-label="Public navigation">

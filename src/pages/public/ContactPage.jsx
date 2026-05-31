@@ -6,10 +6,10 @@ const ContactPage = () => {
     const [email, setEmail] = useState(""); 
     const [message, setMessage] = useState(""); 
     const [errors, setErrors] = useState({}); 
-
+    const [successMessage, setSuccessMessage] = useState(""); 
     const handleSubmit = (e) => {
         e.preventDefault(); 
-
+        setSuccessMessage("");
 
         const newErrors = {}; 
 
@@ -31,7 +31,10 @@ const ContactPage = () => {
         setErrors(newErrors); 
 
         if (Object.keys(newErrors).length === 0) {
-            console.log("Message submitted");
+            setSuccessMessage("Your message has been sent successfully."); 
+            setName("");
+            setEmail("");
+            setMessage(""); 
         }
     }
 
@@ -109,6 +112,11 @@ const ContactPage = () => {
                                 Send Message
                             </button>
                         </form>
+                        {successMessage && (
+                            <p className="mt-4 rounded-md bg-green-100 px-4 py-3 text-sm text-green-700">
+                                {successMessage}
+                            </p>
+                        )}
                     </div>
 
                     <div className="bg-white rounded-xl shadow p-6">
