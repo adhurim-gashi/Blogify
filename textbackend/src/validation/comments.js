@@ -9,4 +9,9 @@ const createCommentSchema = z.object({
 const postIdParam = z.object({ postId: z.string().uuid() });
 const idParam = z.object({ id: z.string().uuid() });
 
-module.exports = { createCommentSchema, postIdParam, idParam };
+const reactionSchema = z.object({
+  id: z.string().uuid(),
+  type: z.enum(['LIKE']).optional(),
+});
+
+module.exports = { createCommentSchema, postIdParam, idParam, reactionSchema };

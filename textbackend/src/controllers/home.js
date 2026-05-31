@@ -1,5 +1,19 @@
 const prisma = require('../utils/prisma');
 
+function visiblePublishedPostWhere(extra = {}) {
+  const now = new Date();
+  return {
+    deletedAt: null,
+    status: 'PUBLISHED',
+    OR: [
+      { isScheduled: false },
+      { isScheduled: true, scheduledAt: { lte: now } },
+      { scheduledAt: null }
+    ],
+    ...extra
+  };
+}
+
 const postSelect = {
   id: true,
   title: true,
@@ -47,11 +61,7 @@ function toHomePost(post) {
 async function featuredPosts(req, res, next) {
   try {
     const posts = await prisma.post.findMany({
-      where: {
-        deletedAt: null,
-        status: 'PUBLISHED',
-        isFeatured: true
-      },
+      where: visiblePublishedPostWhere({ isFeatured: true }),
       select: postSelect,
       orderBy: { createdAt: 'desc' },
       take: 6
@@ -67,7 +77,7 @@ async function featuredPosts(req, res, next) {
 async function stats(req, res, next) {
   try {
     const [totalPosts, totalCategories, totalTags, totalSubscribers] = await prisma.$transaction([
-      prisma.post.count({ where: { deletedAt: null, status: 'PUBLISHED' } }),
+      prisma.post.count({ where: visiblePublishedPostWhere() }),
       prisma.category.count(),
       prisma.tag.count(),
       prisma.newsletterSubscriber.count()
@@ -86,10 +96,7 @@ async function stats(req, res, next) {
 async function recentPosts(req, res, next) {
   try {
     const posts = await prisma.post.findMany({
-      where: {
-        deletedAt: null,
-        status: 'PUBLISHED'
-      },
+      where: visiblePublishedPostWhere(),
       select: postSelect,
       orderBy: { createdAt: 'desc' },
       take: 8

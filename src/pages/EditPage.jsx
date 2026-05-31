@@ -1,6 +1,10 @@
 import { Link, useNavigate, useParams } from "react-router";
-import { useState, useEffect } from "react";
+import { Suspense, lazy, useState, useEffect } from "react";
 import api from "../api";
+
+const RichTextEditor = lazy(() => import("../components/RichTextEditor"));
+
+const isHtmlEmpty = (html) => !html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
 
 const EditPage = () => {
   const navigate = useNavigate();
@@ -54,7 +58,7 @@ const EditPage = () => {
     const newErrors = {};
     if (!formData.title.trim()) newErrors.title = "Title is required";
     if (!formData.slug.trim()) newErrors.slug = "Slug is required";
-    if (!formData.content.trim()) newErrors.content = "Content is required";
+    if (isHtmlEmpty(formData.content)) newErrors.content = "Content is required";
     return newErrors;
   };
 
@@ -111,7 +115,7 @@ const EditPage = () => {
           to="/pages"
           className="text-blue-600 hover:underline text-sm"
         >
-          ← Back to Pages
+          &lt; Back to Pages
         </Link>
       </div>
 
@@ -165,14 +169,16 @@ const EditPage = () => {
             <label className="block text-sm font-semibold text-slate-700 mb-2">
               Page Content *
             </label>
-            <textarea
-              name="content"
-              rows={12}
-              value={formData.content}
-              onChange={handleChange}
-              className="w-full border border-slate-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
-              placeholder="Write your page content here..."
-            />
+            <Suspense fallback={<div className="min-h-72 rounded-xl border border-slate-300 bg-slate-50 p-4 text-sm text-slate-500">Loading editor...</div>}>
+              <RichTextEditor
+                value={formData.content}
+                onChange={(content) => {
+                  setFormData(prev => ({ ...prev, content }));
+                  if (errors.content) setErrors(prev => ({ ...prev, content: "" }));
+                }}
+                placeholder="Write your page content here..."
+              />
+            </Suspense>
             {errors.content && <p className="text-red-500 text-sm mt-1">{errors.content}</p>}
           </div>
 

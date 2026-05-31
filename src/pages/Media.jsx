@@ -98,6 +98,11 @@ const Media = () => {
                   <td className="py-3 px-2 text-slate-600">{file.mimetype}</td>
                   <td className="py-3 px-2 text-slate-600">
                     {(file.size / 1024).toFixed(2)} KB
+                    {file.optimizedSize && (
+                      <p className="text-xs text-green-600">
+                        Optimized {(file.optimizedSize / 1024).toFixed(2)} KB
+                      </p>
+                    )}
                   </td>
                   <td className="py-3 px-2 text-slate-600">
                     {new Date(file.createdAt).toLocaleDateString()}

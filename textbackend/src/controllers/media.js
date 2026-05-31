@@ -1,12 +1,78 @@
 const prisma = require('../utils/prisma');
 const path = require('path');
 const fs = require('fs');
+const sharp = require('sharp');
+
+const imageTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
+
+async function optimizeImage(file) {
+  if (!imageTypes.has(file.mimetype)) {
+    return {
+      filepath: `/uploads/${file.filename}`,
+      originalFilepath: `/uploads/${file.filename}`,
+      optimizedFilepath: null,
+      webpFilepath: null,
+      optimizedSize: null,
+      width: null,
+      height: null,
+    };
+  }
+
+  const uploadsDir = path.join(__dirname, '..', '..', 'uploads');
+  const originalPath = file.path;
+  const parsed = path.parse(file.filename);
+  const optimizedName = `${parsed.name}-optimized${file.mimetype === 'image/png' ? '.png' : '.jpg'}`;
+  const webpName = `${parsed.name}.webp`;
+  const optimizedPath = path.join(uploadsDir, optimizedName);
+  const webpPath = path.join(uploadsDir, webpName);
+
+  const metadata = await sharp(originalPath).metadata();
+
+  if (file.mimetype === 'image/png') {
+    await sharp(originalPath).rotate().resize({ width: 1600, withoutEnlargement: true }).png({ compressionLevel: 9, adaptiveFiltering: true }).toFile(optimizedPath);
+  } else {
+    await sharp(originalPath).rotate().resize({ width: 1600, withoutEnlargement: true }).jpeg({ quality: 82, mozjpeg: true }).toFile(optimizedPath);
+  }
+
+  await sharp(originalPath)
+    .rotate()
+    .resize({ width: 1600, withoutEnlargement: true })
+    .webp({ quality: 82 })
+    .toFile(webpPath);
+
+  const optimizedStat = await fs.promises.stat(optimizedPath);
+
+  return {
+    filepath: `/uploads/${webpName}`,
+    originalFilepath: `/uploads/${file.filename}`,
+    optimizedFilepath: `/uploads/${optimizedName}`,
+    webpFilepath: `/uploads/${webpName}`,
+    optimizedSize: optimizedStat.size,
+    width: metadata.width || null,
+    height: metadata.height || null,
+  };
+}
 
 async function upload(req, res, next) {
   try {
     if (!req.file) return res.status(400).json({ success: false, error: 'File required' });
     const { file, user } = req;
-    const record = await prisma.media.create({ data: { filename: file.originalname, filepath: `/uploads/${file.filename}`, mimetype: file.mimetype, size: file.size, uploaderId: user?.id } });
+    const optimized = await optimizeImage(file);
+    const record = await prisma.media.create({
+      data: {
+        filename: file.originalname,
+        filepath: optimized.filepath,
+        originalFilepath: optimized.originalFilepath,
+        optimizedFilepath: optimized.optimizedFilepath,
+        webpFilepath: optimized.webpFilepath,
+        mimetype: file.mimetype,
+        size: file.size,
+        optimizedSize: optimized.optimizedSize,
+        width: optimized.width,
+        height: optimized.height,
+        uploaderId: user?.id
+      }
+    });
     res.json({ success: true, data: { media: record } });
   } catch (err) { next(err); }
 }
@@ -32,12 +98,13 @@ async function remove(req, res, next) {
     const { id } = req.validated || req.params;
     const rec = await prisma.media.findUnique({ where: { id } });
     if (!rec) return res.status(404).json({ success: false, error: 'Not found' });
-    // remove file from uploads folder if exists
-    const full = path.join(__dirname, '..', '..', rec.filepath.replace(/^\//, ''));
-    fs.unlink(full, (err) => {
-      // If unlink fails, log but continue to remove DB record to avoid orphan references
-      if (err) console.warn('Failed removing file:', full, err.message);
-    });
+    const paths = new Set([rec.filepath, rec.originalFilepath, rec.optimizedFilepath, rec.webpFilepath].filter(Boolean));
+    for (const filepath of paths) {
+      const full = path.join(__dirname, '..', '..', filepath.replace(/^\//, ''));
+      fs.unlink(full, (err) => {
+        if (err) console.warn('Failed removing file:', full, err.message);
+      });
+    }
     await prisma.media.delete({ where: { id } });
     res.json({ success: true, data: { id } });
   } catch (err) { next(err); }

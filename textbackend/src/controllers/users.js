@@ -1,4 +1,5 @@
 const prisma = require('../utils/prisma');
+const { recordAuditLog } = require('../utils/auditLog');
 
 const userSelect = {
   id: true,
@@ -7,6 +8,7 @@ const userSelect = {
   name: true,
   bio: true,
   disabled: true,
+  emailVerified: true,
   role: true,
   createdAt: true,
   updatedAt: true,
@@ -44,20 +46,42 @@ async function get(req, res, next) {
 
 async function update(req, res, next) {
   try {
-    const { id, email, username, name, bio } = req.validated || { id: req.params.id, ...req.body };
+    const { id, email, username, name, bio, role } = req.validated || { id: req.params.id, ...req.body };
     const canManageUsers = ['Admin', 'Author'].includes(req.user.role.name);
     if (!canManageUsers && req.user.id !== id) {
       return res.status(403).json({ success: false, error: 'Forbidden' });
     }
     const data = {};
-    if (email !== undefined) data.email = email;
+    if (email !== undefined && email !== req.user.email) {
+      data.email = email.trim().toLowerCase();
+      data.emailVerified = false;
+      data.emailVerificationToken = null;
+      data.emailVerificationExpiresAt = null;
+    }
     if (username !== undefined) data.username = username;
     if (name !== undefined) data.name = name;
     if (bio !== undefined) {
       const sanitizeHtml = require('sanitize-html');
       data.bio = sanitizeHtml(bio, { allowedTags: [], allowedAttributes: {} });
     }
+    const existing = await prisma.user.findUnique({ where: { id }, include: { role: true } });
+    if (role !== undefined) {
+      if (req.user.role.name !== 'Admin') {
+        return res.status(403).json({ success: false, data: null, message: 'Only Admins can change user roles.' });
+      }
+      const roleRecord = await prisma.role.upsert({ where: { name: role }, update: {}, create: { name: role } });
+      data.roleId = roleRecord.id;
+    }
     const updated = await prisma.user.update({ where: { id }, data, select: userSelect });
+    if (role !== undefined && existing?.role?.name !== role) {
+      await recordAuditLog({
+        action: 'user_role_change',
+        performedById: req.user.id,
+        targetType: 'User',
+        targetId: id,
+        details: { from: existing?.role?.name, to: role },
+      });
+    }
     res.json({ success: true, data: { user: updated } });
   } catch (err) { next(err); }
 }

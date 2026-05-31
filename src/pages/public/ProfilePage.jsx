@@ -13,6 +13,7 @@ const ProfilePage = () => {
     });
     const [message, setMessage] = useState("");
     const [submitting, setSubmitting] = useState(false);
+    const [sendingVerification, setSendingVerification] = useState(false);
 
     useEffect(() => {
         if (user) {
@@ -62,6 +63,19 @@ const ProfilePage = () => {
         }
     };
 
+    const handleResendVerification = async () => {
+        setSendingVerification(true);
+        setMessage("");
+        try {
+            const res = await api.post("/auth/resend-verification", {});
+            setMessage(res.message || "Verification email sent.");
+        } catch (err) {
+            setMessage(err.message || "Unable to resend verification email.");
+        } finally {
+            setSendingVerification(false);
+        }
+    };
+
     return (
         <div className="mx-auto max-w-4xl px-6 py-16">
             <section className="max-w-3xl">
@@ -78,6 +92,21 @@ const ProfilePage = () => {
             </section>
 
             <div className="bg-white rounded-xl shadow p-6 mt-10">
+                {!user.emailVerified && (
+                    <div className="mb-4 rounded-md border border-yellow-200 bg-yellow-50 p-3 text-sm text-yellow-800">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <span>Please verify your email before commenting, applying as a writer, or creating content.</span>
+                            <button
+                                type="button"
+                                onClick={handleResendVerification}
+                                disabled={sendingVerification}
+                                className="rounded-md bg-yellow-500 px-3 py-2 font-medium text-white hover:bg-yellow-600 disabled:opacity-60"
+                            >
+                                {sendingVerification ? "Sending..." : "Resend"}
+                            </button>
+                        </div>
+                    </div>
+                )}
                 {message && (
                     <div className={`mb-4 p-3 rounded-md text-sm ${
                         message.includes("successfully")

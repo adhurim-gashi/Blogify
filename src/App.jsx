@@ -19,6 +19,7 @@ import UploadMedia from "./pages/UploadMedia";
 import Newsletter from "./pages/Newsletter";
 import Settings from "./pages/Settings";
 import Users from "./pages/Users";
+import AuditLogs from "./pages/AuditLogs";
 import PublicLayout from "./layouts/PublicLayout";
 
 import HomePage from "./pages/public/HomePage";
@@ -31,6 +32,8 @@ import ProfilePage from "./pages/public/ProfilePage";
 import SignUpPage from "./pages/public/SignUpPage";
 import NotFoundPage from "./pages/public/NotFoundPage";
 import ForgotPasswordPage from "./pages/public/ForgotPassword";
+import ResetPasswordPage from "./pages/public/ResetPassword";
+import VerifyEmailPage from "./pages/public/VerifyEmail";
 const App = () => {
   return (
 
@@ -46,8 +49,10 @@ const App = () => {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/profile" element={<ProfilePage />} />
       <Route path="/signup" element={<SignUpPage />} />
-      <Route path="*" element={<NotFoundPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/verify-email" element={<VerifyEmailPage />} />
+      <Route path="*" element={<NotFoundPage />} />
 
       </Route>
 
@@ -74,6 +79,7 @@ const App = () => {
       <Route path="newsletter" element={<Newsletter />} />
       <Route path="settings" element={<Settings />} />
       <Route path="users" element={<Users />} />
+      <Route path="audit-logs" element={<AuditLogs />} />
       
       </Route>
     </Routes>

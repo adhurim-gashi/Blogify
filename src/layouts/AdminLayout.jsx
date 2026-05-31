@@ -14,6 +14,7 @@ const adminLinks = [
   { to: "/newsletter", label: "Newsletter" },
   { to: "/settings", label: "Settings" },
   { to: "/users", label: "Users" },
+  { to: "/audit-logs", label: "Audit Logs" },
 ];
 
 const adminLinkClass = ({ isActive }) =>

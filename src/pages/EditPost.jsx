@@ -1,6 +1,16 @@
 import { Link, useNavigate, useParams } from "react-router";
-import { useState, useEffect } from "react";
+import { Suspense, lazy, useState, useEffect } from "react";
 import api from "../api";
+
+const RichTextEditor = lazy(() => import("../components/RichTextEditor"));
+
+const isHtmlEmpty = (html) => !html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
+const toDateTimeLocal = (value) => {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+};
 
 const EditPost = () => {
   const navigate = useNavigate();
@@ -10,8 +20,13 @@ const EditPost = () => {
     title: "",
     slug: "",
     excerpt: "",
+    metaTitle: "",
+    metaDescription: "",
+    ogImage: "",
     content: "",
     status: "DRAFT",
+    isScheduled: false,
+    scheduledAt: "",
     categoryId: "",
     tagIds: [],
   });
@@ -40,8 +55,13 @@ const EditPost = () => {
             title: post.title || "",
             slug: post.slug || "",
             excerpt: post.excerpt || "",
+            metaTitle: post.metaTitle || "",
+            metaDescription: post.metaDescription || "",
+            ogImage: post.ogImage || "",
             content: post.content || "",
             status: post.status || "DRAFT",
+            isScheduled: Boolean(post.isScheduled),
+            scheduledAt: toDateTimeLocal(post.scheduledAt),
             categoryId: post.categoryId || post.categories?.[0]?.id || "",
             tagIds: post.tags?.map(tag => tag.id) || [],
           });
@@ -57,9 +77,11 @@ const EditPost = () => {
   }, [id]);
 
   const handleChange = (e) => {
-    const { name, value, selectedOptions } = e.target;
+    const { name, value, selectedOptions, type, checked } = e.target;
     const nextValue = name === "tagIds"
       ? Array.from(selectedOptions).map(option => option.value)
+      : type === "checkbox"
+        ? checked
       : value;
     setFormData(prev => ({ ...prev, [name]: nextValue }));
     if (errors[name]) setErrors(prev => ({ ...prev, [name]: "" }));
@@ -70,8 +92,9 @@ const EditPost = () => {
     if (!formData.title.trim()) newErrors.title = "Title is required";
     if (!formData.slug.trim()) newErrors.slug = "Slug is required";
     if (!formData.excerpt.trim()) newErrors.excerpt = "Excerpt is required";
-    if (!formData.content.trim()) newErrors.content = "Content is required";
+    if (isHtmlEmpty(formData.content)) newErrors.content = "Content is required";
     if (!formData.categoryId) newErrors.categoryId = "Category is required";
+    if (formData.isScheduled && !formData.scheduledAt) newErrors.scheduledAt = "Schedule date is required";
     return newErrors;
   };
 
@@ -91,8 +114,13 @@ const EditPost = () => {
         title: formData.title.trim(),
         slug: formData.slug.trim(),
         excerpt: formData.excerpt.trim(),
+        metaTitle: formData.metaTitle || null,
+        metaDescription: formData.metaDescription || null,
+        ogImage: formData.ogImage || null,
         content: formData.content.trim(),
         status: formData.status,
+        isScheduled: formData.isScheduled,
+        scheduledAt: formData.isScheduled ? new Date(formData.scheduledAt).toISOString() : null,
         categories: formData.categoryId ? [formData.categoryId] : [],
         tags: formData.tagIds,
       });
@@ -126,7 +154,7 @@ const EditPost = () => {
           <p className="text-slate-600">Update your blog post details</p>
         </div>
         <Link to="/posts" className="text-blue-600 hover:underline text-sm">
-          ← Back to Posts
+          &lt; Back to Posts
         </Link>
       </div>
 
@@ -216,6 +244,69 @@ const EditPost = () => {
             </div>
           </div>
 
+          <div className="rounded-xl border border-slate-200 p-4">
+            <h2 className="text-sm font-semibold text-slate-700">SEO</h2>
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-slate-700">Meta Title</label>
+                <input
+                  type="text"
+                  name="metaTitle"
+                  value={formData.metaTitle}
+                  onChange={handleChange}
+                  maxLength={70}
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-slate-700">Open Graph Image URL</label>
+                <input
+                  type="text"
+                  name="ogImage"
+                  value={formData.ogImage}
+                  onChange={handleChange}
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+            <div className="mt-4">
+              <label className="mb-2 block text-sm font-semibold text-slate-700">Meta Description</label>
+              <textarea
+                name="metaDescription"
+                value={formData.metaDescription}
+                onChange={handleChange}
+                maxLength={160}
+                rows={2}
+                className="w-full rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <label className="flex items-center gap-3 text-sm font-semibold text-slate-700">
+              <input
+                type="checkbox"
+                name="isScheduled"
+                checked={formData.isScheduled}
+                onChange={handleChange}
+                className="h-4 w-4 rounded border-slate-300 text-blue-600"
+              />
+              Schedule this post for future publishing
+            </label>
+            {formData.isScheduled && (
+              <div className="mt-3">
+                <input
+                  type="datetime-local"
+                  name="scheduledAt"
+                  value={formData.scheduledAt}
+                  onChange={handleChange}
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:w-80"
+                />
+                {errors.scheduledAt && <p className="mt-1 text-sm text-red-500">{errors.scheduledAt}</p>}
+              </div>
+            )}
+          </div>
+
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">Tags</label>
             <select
@@ -234,14 +325,16 @@ const EditPost = () => {
           {/* Content */}
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">Content *</label>
-            <textarea
-              name="content"
-              rows={14}
-              value={formData.content}
-              onChange={handleChange}
-              className="w-full border border-slate-300 rounded-xl px-4 py-3 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Write your post content here..."
-            />
+            <Suspense fallback={<div className="min-h-72 rounded-xl border border-slate-300 bg-slate-50 p-4 text-sm text-slate-500">Loading editor...</div>}>
+              <RichTextEditor
+                value={formData.content}
+                onChange={(content) => {
+                  setFormData(prev => ({ ...prev, content }));
+                  if (errors.content) setErrors(prev => ({ ...prev, content: "" }));
+                }}
+                placeholder="Write your post content here..."
+              />
+            </Suspense>
             {errors.content && <p className="text-red-500 text-sm mt-1">{errors.content}</p>}
           </div>
 

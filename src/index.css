@@ -32,3 +32,62 @@
         letter-spacing: -0.02em;
     }
 }
+
+@layer components {
+    .blogify-editor p {
+        margin: 0.65rem 0;
+    }
+
+    .blogify-editor h2 {
+        margin: 1.15rem 0 0.5rem;
+        font-size: 1.35rem;
+        font-weight: 700;
+    }
+
+    .blogify-editor h3 {
+        margin: 1rem 0 0.5rem;
+        font-size: 1.1rem;
+        font-weight: 700;
+    }
+
+    .blogify-editor ul,
+    .blogify-editor ol {
+        margin: 0.75rem 0;
+        padding-left: 1.35rem;
+    }
+
+    .blogify-editor ul {
+        list-style: disc;
+    }
+
+    .blogify-editor ol {
+        list-style: decimal;
+    }
+
+    .blogify-editor blockquote {
+        margin: 1rem 0;
+        border-left: 3px solid rgb(59 130 246);
+        padding-left: 1rem;
+        color: rgb(71 85 105);
+    }
+
+    .blogify-editor pre {
+        margin: 1rem 0;
+        overflow-x: auto;
+        border-radius: 0.5rem;
+        background: rgb(15 23 42);
+        padding: 0.9rem;
+        color: white;
+    }
+
+    .blogify-editor img {
+        margin: 1rem 0;
+        max-width: 100%;
+        border-radius: 0.5rem;
+    }
+
+    .blogify-editor a {
+        color: rgb(37 99 235);
+        text-decoration: underline;
+    }
+}

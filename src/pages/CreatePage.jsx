@@ -1,6 +1,10 @@
 import { Link, useNavigate } from "react-router";
-import { useState } from "react";
+import { Suspense, lazy, useState } from "react";
 import { api } from "../api";
+
+const RichTextEditor = lazy(() => import("../components/RichTextEditor"));
+
+const isHtmlEmpty = (html) => !html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
 
 const CreatePage = () => {
   const navigate = useNavigate();
@@ -24,7 +28,7 @@ const CreatePage = () => {
   const validate = () => {
     const newErrors = {};
     if (!formData.title.trim()) newErrors.title = "Title is required";
-    if (!formData.content.trim()) newErrors.content = "Content is required";
+    if (isHtmlEmpty(formData.content)) newErrors.content = "Content is required";
     return newErrors;
   };
 
@@ -94,14 +98,16 @@ const CreatePage = () => {
             <label className="block text-sm font-medium text-slate-700 mb-2">
               Content *
             </label>
-            <textarea
-              name="content"
-              rows="8"
-              placeholder="Write page content here..."
-              value={formData.content}
-              onChange={handleChange}
-              className="w-full border border-slate-300 rounded-md px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            <Suspense fallback={<div className="min-h-72 rounded-md border border-slate-300 bg-slate-50 p-4 text-sm text-slate-500">Loading editor...</div>}>
+              <RichTextEditor
+                value={formData.content}
+                onChange={(content) => {
+                  setFormData(prev => ({ ...prev, content }));
+                  if (errors.content) setErrors(prev => ({ ...prev, content: "" }));
+                }}
+                placeholder="Write page content here..."
+              />
+            </Suspense>
             {errors.content && <p className="text-red-500 text-sm mt-1">{errors.content}</p>}
           </div>
 

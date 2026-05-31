@@ -10,6 +10,8 @@ const SinglePost = () => {
     const [post, setPost] = useState(null);
     const [comments, setComments] = useState([]);
     const [commentText, setCommentText] = useState("");
+    const [replyTextById, setReplyTextById] = useState({});
+    const [replyingTo, setReplyingTo] = useState("");
     const [loading, setLoading] = useState(true);
     const [message, setMessage] = useState("");
 
@@ -36,30 +38,75 @@ const SinglePost = () => {
         loadPost();
     }, [slug]);
 
-    const handleReaction = () => {
+    useEffect(() => {
+        if (!post) return;
+        const previousTitle = document.title;
+        const setMeta = (property, content) => {
+            if (!content) return;
+            let tag = document.querySelector(`meta[property="${property}"]`);
+            if (!tag) {
+                tag = document.createElement("meta");
+                tag.setAttribute("property", property);
+                document.head.appendChild(tag);
+            }
+            tag.setAttribute("content", content);
+        };
+
+        document.title = post.metaTitle || post.title;
+        setMeta("og:title", post.metaTitle || post.title);
+        setMeta("og:description", post.metaDescription || post.excerpt);
+        setMeta("og:image", post.ogImage);
+        setMeta("og:type", "article");
+
+        return () => {
+            document.title = previousTitle;
+        };
+    }, [post]);
+
+    const threadComments = (items) => {
+        const byId = new Map(items.map(comment => [comment.id, { ...comment, replies: [] }]));
+        const roots = [];
+        byId.forEach(comment => {
+            if (comment.parentId && byId.has(comment.parentId)) {
+                byId.get(comment.parentId).replies.push(comment);
+            } else {
+                roots.push(comment);
+            }
+        });
+        return roots;
+    };
+
+    const handleArticleReaction = () => {
         if (!user) {
             navigate("/login");
         }
     };
 
-    const handleCommentSubmit = async (e) => {
+    const handleCommentSubmit = async (e, parentId = null) => {
         e.preventDefault();
         if (!user) {
             navigate("/login");
             return;
         }
-        if (!commentText.trim()) {
+        const text = parentId ? replyTextById[parentId] || "" : commentText;
+        if (!text.trim()) {
             setMessage("Please enter a comment.");
             return;
         }
 
         try {
             const res = await api.post("/comments", {
-                content: commentText.trim(),
+                content: text.trim(),
                 postId: post.id,
+                parentId: parentId || undefined,
             });
             if (res.success) {
-                setCommentText("");
+                if (parentId) {
+                    setReplyTextById(prev => ({ ...prev, [parentId]: "" }));
+                    setReplyingTo("");
+                } else {
+                    setCommentText("");
+                }
                 setMessage("Comment submitted for moderation.");
             } else {
                 setMessage(res.message || res.error || "Failed to post comment");
@@ -68,6 +115,81 @@ const SinglePost = () => {
             setMessage(err.message || "Error posting comment");
         }
     };
+
+    const handleCommentReaction = async (commentId) => {
+        if (!user) {
+            navigate("/login");
+            return;
+        }
+
+        try {
+            const res = await api.post(`/comments/${commentId}/react`, { type: "LIKE" });
+            if (res.success) {
+                setComments(current => current.map(comment =>
+                    comment.id === commentId
+                        ? { ...comment, reactionCount: res.data.reactionCount }
+                        : comment
+                ));
+            }
+        } catch (err) {
+            setMessage(err.message || "Unable to react to comment.");
+        }
+    };
+
+    const renderComment = (comment, depth = 0) => (
+        <div key={comment.id} className={`${depth > 0 ? "ml-4 border-l border-slate-200 pl-4" : ""}`}>
+            <div className="rounded-xl bg-white p-5 shadow">
+                <div className="flex items-center justify-between">
+                    <h4 className="font-semibold">{comment.author?.name || "Reader"}</h4>
+                    <span className="text-sm text-slate-500">
+                        {new Date(comment.createdAt).toLocaleDateString()}
+                    </span>
+                </div>
+
+                <p className="mt-3 text-slate-600">
+                    {comment.content}
+                </p>
+
+                <div className="mt-4 flex flex-wrap gap-3 text-sm">
+                    <button
+                        type="button"
+                        onClick={() => handleCommentReaction(comment.id)}
+                        className="rounded-md border border-slate-300 px-3 py-1 font-medium text-slate-600 hover:border-blue-500 hover:text-blue-600"
+                    >
+                        Like ({comment.reactionCount || 0})
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setReplyingTo(replyingTo === comment.id ? "" : comment.id)}
+                        className="rounded-md border border-slate-300 px-3 py-1 font-medium text-slate-600 hover:border-blue-500 hover:text-blue-600"
+                    >
+                        Reply
+                    </button>
+                </div>
+
+                {replyingTo === comment.id && (
+                    <form className="mt-4 space-y-3" onSubmit={(e) => handleCommentSubmit(e, comment.id)}>
+                        <textarea
+                            rows="3"
+                            value={replyTextById[comment.id] || ""}
+                            onChange={(e) => setReplyTextById(prev => ({ ...prev, [comment.id]: e.target.value }))}
+                            placeholder="Write a reply..."
+                            className="w-full rounded-md border border-slate-300 px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <button type="submit" className="rounded-md bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600">
+                            Post Reply
+                        </button>
+                    </form>
+                )}
+            </div>
+
+            {comment.replies?.length > 0 && (
+                <div className="mt-4 space-y-4">
+                    {comment.replies.map(reply => renderComment(reply, depth + 1))}
+                </div>
+            )}
+        </div>
+    );
 
     if (loading) {
         return (
@@ -122,7 +244,7 @@ const SinglePost = () => {
                     )}
 
                     <div
-                    className="mt-6 text-slate-700 leading-8"
+                    className="blogify-editor mt-6 text-slate-700"
                     dangerouslySetInnerHTML={{ __html: post.content }}
                     />
 
@@ -133,12 +255,12 @@ const SinglePost = () => {
 
                         <div className="flex gap-4">
                             <button className="border border-green-500 text-green-600 px-4 py-2 rounded-md font-medium hover:bg-green-500 hover:text-white transition duration-300"
-                            onClick={handleReaction}
+                            onClick={handleArticleReaction}
                             >
                             Like
                             </button>
                             <button className="border border-red-500 text-red-600 px-4 py-2 rounded-md font-medium hover:bg-red-500 hover:text-white transition duration-300"
-                            onClick={handleReaction}
+                            onClick={handleArticleReaction}
                             >
                             Dislike
                             </button>
@@ -155,7 +277,7 @@ const SinglePost = () => {
                     </p>
 
                     <div className="bg-white rounded-xl shadow p-6 mt-6">
-                        <form className="space-y-5" onSubmit={handleCommentSubmit}>
+                        <form className="space-y-5" onSubmit={(e) => handleCommentSubmit(e)}>
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-2">
                                     Your Comment
@@ -183,20 +305,7 @@ const SinglePost = () => {
                         {comments.length === 0 ? (
                             <p className="text-slate-500">No approved comments yet.</p>
                         ) : (
-                            comments.map(comment => (
-                                <div key={comment.id} className="bg-white rounded-xl shadow p-5">
-                                    <div className="flex items-center justify-between">
-                                        <h4 className="font-semibold">{comment.author?.name || "Reader"}</h4>
-                                        <span className="text-sm text-slate-500">
-                                            {new Date(comment.createdAt).toLocaleDateString()}
-                                        </span>
-                                    </div>
-
-                                    <p className="mt-3 text-slate-600">
-                                        {comment.content}
-                                    </p>
-                                </div>
-                            ))
+                            threadComments(comments).map(comment => renderComment(comment))
                         )}
                     </div>
                 </div>

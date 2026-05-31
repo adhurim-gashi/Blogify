@@ -97,12 +97,19 @@ const Posts = () => {
                   <td className="py-3 px-2 font-medium">{post.title}</td>
                   <td className="py-3 px-2">
                     <span className={`px-2 py-1 rounded-md text-xs font-medium ${
-                      post.status === "PUBLISHED"
+                      post.isScheduled
+                        ? "bg-blue-100 text-blue-700"
+                        : post.status === "PUBLISHED"
                         ? "bg-green-100 text-green-700"
                         : "bg-yellow-100 text-yellow-700"
                     }`}>
-                      {post.status}
+                      {post.isScheduled ? "SCHEDULED" : post.status}
                     </span>
+                    {post.isScheduled && post.scheduledAt && (
+                      <p className="mt-1 text-xs text-slate-500">
+                        {new Date(post.scheduledAt).toLocaleString()}
+                      </p>
+                    )}
                   </td>
                   <td className="py-3 px-2">{post.author?.name || "Unknown"}</td>
                   <td className="py-3 px-2 text-slate-600">

@@ -1,4 +1,19 @@
 const prisma = require('../utils/prisma');
+const { recordAuditLog } = require('../utils/auditLog');
+
+function publicPostWhere(id) {
+  const now = new Date();
+  return {
+    id,
+    deletedAt: null,
+    status: 'PUBLISHED',
+    OR: [
+      { isScheduled: false },
+      { isScheduled: true, scheduledAt: { lte: now } },
+      { scheduledAt: null }
+    ],
+  };
+}
 
 async function create(req, res, next) {
   try {
@@ -6,6 +21,14 @@ async function create(req, res, next) {
     const sanitizeHtml = require('sanitize-html');
     // sanitize incoming content to prevent XSS and match spec: Input sanitization on rich fields
     const clean = sanitizeHtml(content, { allowedTags: [], allowedAttributes: {} });
+    const post = await prisma.post.findFirst({ where: publicPostWhere(postId) });
+    if (!post) return res.status(404).json({ success: false, data: null, message: 'Post is not available for comments.' });
+
+    if (parentId) {
+      const parent = await prisma.comment.findFirst({ where: { id: parentId, postId, deletedAt: null, approved: true } });
+      if (!parent) return res.status(400).json({ success: false, data: null, message: 'Parent comment does not belong to this post.' });
+    }
+
     // Create comment with `approved: false` by default to require moderation
     // This satisfies spec #8: Comments linked to user + post and moderation (approve/reject)
     const comment = await prisma.comment.create({ data: { content: clean, postId, parentId: parentId || null, authorId: req.user.id, approved: false } });
@@ -22,9 +45,21 @@ async function listByPost(req, res, next) {
     const comments = await prisma.comment.findMany({
       where,
       orderBy: { createdAt: 'asc' },
-      include: { author: { select: { id: true, name: true, username: true } } }
+      include: {
+        author: { select: { id: true, name: true, username: true } },
+        _count: { select: { reactions: true } }
+      }
     });
-    res.json({ success: true, data: { comments } });
+    res.json({
+      success: true,
+      data: {
+        comments: comments.map(comment => ({
+          ...comment,
+          reactionCount: comment._count.reactions,
+          _count: undefined
+        }))
+      }
+    });
   } catch (err) { next(err); }
 }
 
@@ -65,6 +100,7 @@ async function approve(req, res, next) {
   try {
     const { id } = req.validated || req.params;
     const updated = await prisma.comment.update({ where: { id }, data: { approved: true } });
+    await recordAuditLog({ action: 'comment_approve', performedById: req.user.id, targetType: 'Comment', targetId: id });
     res.json({ success: true, data: { comment: updated } });
   } catch (err) { next(err); }
 }
@@ -76,8 +112,34 @@ async function reject(req, res, next) {
   try {
     const { id } = req.validated || req.params;
     const updated = await prisma.comment.update({ where: { id }, data: { deletedAt: new Date() } });
+    await recordAuditLog({ action: 'comment_reject', performedById: req.user.id, targetType: 'Comment', targetId: id });
     res.json({ success: true, data: { comment: updated } });
   } catch (err) { next(err); }
 }
 
-module.exports = { create, listByPost, listAll, remove, approve, reject };
+async function toggleReaction(req, res, next) {
+  try {
+    const { id, type = 'LIKE' } = req.validated || req.params;
+    const comment = await prisma.comment.findFirst({ where: { id, deletedAt: null, approved: true } });
+    if (!comment) return res.status(404).json({ success: false, data: null, message: 'Comment not found.' });
+
+    const existing = await prisma.commentReaction.findUnique({
+      where: { commentId_userId_type: { commentId: id, userId: req.user.id, type } },
+    });
+
+    if (existing) {
+      await prisma.commentReaction.delete({ where: { id: existing.id } });
+    } else {
+      await prisma.commentReaction.create({ data: { commentId: id, userId: req.user.id, type } });
+    }
+
+    const reactionCount = await prisma.commentReaction.count({ where: { commentId: id, type } });
+    res.json({
+      success: true,
+      data: { liked: !existing, reactionCount },
+      message: existing ? 'Reaction removed.' : 'Reaction saved.',
+    });
+  } catch (err) { next(err); }
+}
+
+module.exports = { create, listByPost, listAll, remove, approve, reject, toggleReaction };

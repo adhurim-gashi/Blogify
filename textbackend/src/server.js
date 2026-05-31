@@ -7,8 +7,10 @@ const cors = require('cors');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
+const { startPostScheduler } = require('./utils/scheduler');
 
 const { errorHandler } = require('./middlewares/errorHandler');
+const sitemapController = require('./controllers/sitemap');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const postRoutes = require('./routes/posts');
@@ -21,14 +23,17 @@ const commentsRoutes = require('./routes/comments');
 const pagesRoutes = require('./routes/pages');
 const newsletterRoutes = require('./routes/newsletter');
 const homeRoutes = require('./routes/home');
+const writerRoutes = require('./routes/writer');
+const auditLogRoutes = require('./routes/auditLogs');
 
 const { responseWrapper } = require('./middlewares/responseWrapper');
 const app = express();
 
 // Health
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
+app.get('/sitemap.xml', sitemapController.sitemap);
 
-app.set('trust proxy', true);
+app.set('trust proxy', config.trustProxy);
 // Uploaded media is served from the API origin and embedded by the frontend origin.
 app.use(helmet({ contentSecurityPolicy: false, crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 const allowed = config.corsOrigins;
@@ -59,10 +64,13 @@ app.use('/api/newsletter', newsletterRoutes);
 app.use('/api/tags', tagsRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/home', homeRoutes);
+app.use('/api/writer', writerRoutes);
+app.use('/api/audit-logs', auditLogRoutes);
 
 app.use(errorHandler);
 
 const PORT = config.port || 4000;
 app.listen(PORT, () => {
   console.log(`Blogify backend listening on port ${PORT}`);
+  startPostScheduler();
 });

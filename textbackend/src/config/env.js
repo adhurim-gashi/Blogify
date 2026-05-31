@@ -14,6 +14,9 @@ const envSchema = z.object({
   CORS_ORIGINS: z.string().optional(),
   MAX_UPLOAD_SIZE: z.string().optional(),
   RATE_LIMIT_MAX: z.string().optional(),
+  PASSWORD_RESET_TTL_MS: z.string().optional(),
+  TRUST_PROXY: z.string().optional(),
+  SITE_URL: z.string().url().optional(),
 });
 
 // Parse and validate process.env
@@ -26,6 +29,13 @@ if (!parsed.success) {
 
 // Export a normalized config object for use by the server
 const raw = parsed.data;
+const parseTrustProxy = (value) => {
+  if (!value || value === '0' || value.toLowerCase() === 'false') return false;
+  const numeric = Number(value);
+  if (Number.isInteger(numeric) && numeric >= 0) return numeric;
+  return value;
+};
+
 const config = {
   databaseUrl: raw.DATABASE_URL,
   jwt: {
@@ -39,6 +49,9 @@ const config = {
   corsOrigins: raw.CORS_ORIGINS ? raw.CORS_ORIGINS.split(',') : ['http://localhost:5173'],
   maxUploadSize: parseInt(raw.MAX_UPLOAD_SIZE || '5242880'),
   rateLimitMax: parseInt(raw.RATE_LIMIT_MAX || '1000'),
+  passwordResetTtlMs: parseInt(raw.PASSWORD_RESET_TTL_MS || String(60 * 60 * 1000)),
+  trustProxy: parseTrustProxy(raw.TRUST_PROXY),
+  siteUrl: (raw.SITE_URL || 'http://localhost:5173').replace(/\/$/, ''),
 };
 
 module.exports = config;

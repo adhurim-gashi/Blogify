@@ -3,6 +3,8 @@ generator client {
 }
 
 datasource db {
+  // Development uses SQLite by default. Production can use the same models with
+  // PostgreSQL by changing this provider and DATABASE_URL before running migrations.
   provider = "sqlite"
   url      = env("DATABASE_URL")
 }
@@ -14,6 +16,9 @@ model User {
   password     String
   name         String?
   bio          String?
+  emailVerified Boolean  @default(false)
+  emailVerificationToken String? @unique
+  emailVerificationExpiresAt DateTime?
   // `disabled` flag allows administrators to disable/enable accounts without deleting
   // Implements spec: #13 Users API - disable/activate user
   disabled     Boolean   @default(false)
@@ -21,13 +26,19 @@ model User {
   roleId       String
   posts        Post[]
   comments     Comment[]
+  commentReactions CommentReaction[]
   media        Media[]
   refreshTokens RefreshToken[]
+  writerApplications WriterApplication[] @relation("WriterApplicationApplicant")
+  reviewedWriterApplications WriterApplication[] @relation("WriterApplicationReviewer")
+  passwordResetTokens PasswordResetToken[]
+  auditLogs AuditLog[]
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?
 
   @@index([email])
+  @@index([emailVerified])
 }
 
 model Role {
@@ -42,7 +53,12 @@ model Post {
   slug        String   @unique
   excerpt     String?
   content     String
+  metaTitle   String?
+  metaDescription String?
+  ogImage     String?
   status      String   @default("DRAFT")
+  scheduledAt DateTime?
+  isScheduled Boolean  @default(false)
   author      User     @relation(fields: [authorId], references: [id])
   authorId    String
   categories  Category[] @relation("PostCategories")
@@ -58,6 +74,7 @@ model Post {
 
   @@index([slug])
   @@index([createdAt])
+  @@index([status, isScheduled, scheduledAt])
 }
 
 model Category {
@@ -80,7 +97,7 @@ model Comment {
   id        String   @id @default(uuid())
   content   String
   // Added `approved` flag to support moderation workflows (approve/reject)
-  // Implements spec: #8 Comments API — approve/reject comment
+  // Implements spec: #8 Comments API - approve/reject comment
   // Default false ensures new comments require moderation unless published automatically
   approved  Boolean  @default(false)
   author    User     @relation(fields: [authorId], references: [id])
@@ -88,8 +105,25 @@ model Comment {
   post      Post     @relation(fields: [postId], references: [id])
   postId    String
   parentId  String?
+  reactions CommentReaction[]
   createdAt DateTime @default(now())
   deletedAt DateTime?
+
+  @@index([postId, parentId])
+}
+
+model CommentReaction {
+  id        String   @id @default(uuid())
+  type      String   @default("LIKE")
+  comment   Comment  @relation(fields: [commentId], references: [id])
+  commentId String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime @default(now())
+
+  @@unique([commentId, userId, type])
+  @@index([commentId])
+  @@index([userId])
 }
 
 model Page {
@@ -106,8 +140,12 @@ model Media {
   id          String   @id @default(uuid())
   filename    String
   filepath    String
+  originalFilepath String?
+  optimizedFilepath String?
+  webpFilepath String?
   mimetype    String
   size        Int
+  optimizedSize Int?
   width       Int?
   height      Int?
   uploader    User?    @relation(fields: [uploaderId], references: [id])
@@ -128,6 +166,23 @@ model NewsletterSubscriber {
   createdAt DateTime @default(now())
 }
 
+model WriterApplication {
+  id           String   @id @default(uuid())
+  user         User     @relation("WriterApplicationApplicant", fields: [userId], references: [id])
+  userId       String
+  status       String   @default("PENDING")
+  message      String?
+  reviewNote   String?
+  reviewedAt   DateTime?
+  reviewedBy   User?    @relation("WriterApplicationReviewer", fields: [reviewedById], references: [id])
+  reviewedById String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status, createdAt])
+}
+
 model RefreshToken {
   id        String   @id @default(uuid())
   token     String   @unique
@@ -138,6 +193,19 @@ model RefreshToken {
   createdAt DateTime @default(now())
 }
 
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
 model Audit {
   id        String   @id @default(uuid())
   action    String
@@ -146,4 +214,20 @@ model Audit {
   payload   String?
   userId    String?
   createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id            String   @id @default(uuid())
+  action        String
+  performedBy   User?    @relation(fields: [performedById], references: [id])
+  performedById String?
+  targetType    String
+  targetId      String
+  details       String?
+  timestamp     DateTime @default(now())
+
+  @@index([action])
+  @@index([targetType, targetId])
+  @@index([performedById])
+  @@index([timestamp])
 }

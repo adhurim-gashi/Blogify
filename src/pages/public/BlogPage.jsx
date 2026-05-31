@@ -100,7 +100,7 @@ const BlogPage = () => {
               </p>
 
               <div className="mt-3 text-sm text-slate-500">
-                {new Date(post.createdAt).toLocaleDateString()} · {post.views || 0} views
+                {new Date(post.createdAt).toLocaleDateString()} - {post.views || 0} views
               </div>
 
               <Link
