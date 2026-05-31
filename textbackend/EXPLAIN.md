@@ -4,7 +4,7 @@ This document explains models, relations, endpoints, how to run, env variables, 
 
 ## Models & Relations
 
-- `User` - primary user model. Relations: `role`, `posts`, `comments`, `commentReactions`, `media`, `refreshTokens`, `writerApplications`, `passwordResetTokens`, `auditLogs`. New signups are `Reader` accounts with `emailVerified=false` until the verification token is confirmed.
+- `User` - primary user model. Relations: `role`, `posts`, `comments`, `commentReactions`, `postReactions`, `media`, `refreshTokens`, `writerApplications`, `passwordResetTokens`, `auditLogs`. New signups are `Reader` accounts with `emailVerified=false` until the verification token is confirmed.
 - `Role` - roles like `Admin`, `Author`, `Reader`. One-to-many with `User`.
 - `Post` - blog posts. Fields: `title`, `slug`, rich HTML `content`, `excerpt`, `status`, `scheduledAt`, `isScheduled`, `metaTitle`, `metaDescription`, `ogImage`. Relations: `author` (User), `categories` (Category[]), `tags` (Tag[]), `comments`, optional `media`.
 - `Category` - categories with `name` and `slug`. Many-to-many with `Post` (via implicit relation).
@@ -12,6 +12,7 @@ This document explains models, relations, endpoints, how to run, env variables, 
 - `Comment` - comments referencing `post` and `author`.
   - Note: `Comment` includes `approved` boolean (default false), optional `parentId` for replies, and public listing only returns approved comments.
 - `CommentReaction` - one user reaction per comment/type, currently used for comment likes.
+- `PostReaction` - one logged-in user reaction per post, used for article like/dislike counts.
 - `Page` - static pages with `title`, `slug`, `content`.
 - `Media` - uploaded files metadata: `filename`, public `filepath`, original/optimized/WebP paths, `mimetype`, original/optimized sizes, optional dimensions, `uploader`.
 - `Setting` - key/value pairs for site settings.
@@ -45,6 +46,7 @@ This document explains models, relations, endpoints, how to run, env variables, 
 
 - GET /api/posts - list posts. Query: `page`, `perPage`, `q` (search). Public callers only receive `PUBLISHED` posts; authenticated Admin/Author callers can see drafts.
 - GET /api/posts/:slug - get post by slug. Public and published-only.
+- POST /api/posts/:id/react - logged-in users can toggle `LIKE` or `DISLIKE` on a published post; email verification is not required for reader engagement.
 - POST /api/posts - create post. Auth: verified `Author|Admin`. Body: `{ title, content, excerpt?, status?, isScheduled?, scheduledAt?, categories?: [id], tags?: [id], metaTitle?, metaDescription?, ogImage? }`.
 - PUT /api/posts/:id - update post. Auth: `Author|Admin`.
 - DELETE /api/posts/:id - soft-delete post. Auth: `Author|Admin`.
@@ -65,11 +67,11 @@ This document explains models, relations, endpoints, how to run, env variables, 
 - GET /api/dashboard/stats - Admin-only stats: counts of users/posts/categories/comments/media/tags.
 
 Comments moderation:
-- POST /api/comments - verified users can submit comments or replies with optional `parentId`; comments require approval before public display.
+- POST /api/comments - logged-in users can submit comments or replies with optional `parentId`; comments require approval before public display, but email verification is not required.
 - GET /api/comments/post/:postId - public approved comments for a post, including `parentId` and reaction counts for threaded UIs.
 - POST /api/comments/:id/approve - Admin/Author: approve a comment (sets `approved=true`).
 - POST /api/comments/:id/reject - Admin/Author: reject (soft-delete) a comment.
-- POST /api/comments/:id/react - verified users can toggle a `LIKE` reaction on an approved comment.
+- POST /api/comments/:id/react - logged-in users can toggle a `LIKE` reaction on an approved comment.
 
 Audit logs:
 - GET /api/audit-logs - Admin-only audit log list with optional `action`, `targetType`, and `performedById` filters.
@@ -127,6 +129,7 @@ CMS extension routes are documented above and covered by
 - `PASSWORD_RESET_TTL_MS` - password reset token lifetime in milliseconds.
  - `TRUST_PROXY` - set to `0` locally. In production behind a reverse proxy, set to the exact number of trusted proxies.
 - `SITE_URL` - public frontend origin used when generating sitemap URLs.
+- Frontend `VITE_API_URL` - API origin or base URL, such as `http://localhost:4000`, `http://localhost:5000`, or `https://api.example.com/api`.
 
 ## Background jobs and verification
 

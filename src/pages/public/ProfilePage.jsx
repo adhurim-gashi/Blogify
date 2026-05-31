@@ -95,7 +95,7 @@ const ProfilePage = () => {
                 {!user.emailVerified && (
                     <div className="mb-4 rounded-md border border-yellow-200 bg-yellow-50 p-3 text-sm text-yellow-800">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            <span>Please verify your email before commenting, applying as a writer, or creating content.</span>
+                            <span>Please verify your email before applying as a writer or creating content.</span>
                             <button
                                 type="button"
                                 onClick={handleResendVerification}

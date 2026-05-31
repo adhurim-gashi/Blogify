@@ -27,6 +27,7 @@ model User {
   posts        Post[]
   comments     Comment[]
   commentReactions CommentReaction[]
+  postReactions PostReaction[]
   media        Media[]
   refreshTokens RefreshToken[]
   writerApplications WriterApplication[] @relation("WriterApplicationApplicant")
@@ -64,6 +65,7 @@ model Post {
   categories  Category[] @relation("PostCategories")
   tags        Tag[]     @relation("PostTags")
   comments    Comment[]
+  reactions   PostReaction[]
   media       Media?    @relation(fields: [mediaId], references: [id])
   mediaId     String?
   views       Int       @default(0)
@@ -123,6 +125,20 @@ model CommentReaction {
 
   @@unique([commentId, userId, type])
   @@index([commentId])
+  @@index([userId])
+}
+
+model PostReaction {
+  id        String   @id @default(uuid())
+  type      String   @default("LIKE")
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId])
+  @@index([postId])
   @@index([userId])
 }
 

@@ -204,6 +204,16 @@ async function cleanupVerificationData() {
       },
     });
   }
+  if (postIds.length || userIds.length) {
+    await prisma.postReaction.deleteMany({
+      where: {
+        OR: [
+          ...(postIds.length ? [{ postId: { in: postIds } }] : []),
+          ...(userIds.length ? [{ userId: { in: userIds } }] : []),
+        ],
+      },
+    });
+  }
   if (commentIds.length) await prisma.comment.deleteMany({ where: { id: { in: commentIds } } });
   if (applicationIds.length) await prisma.writerApplication.deleteMany({ where: { id: { in: applicationIds } } });
   if (userIds.length) {
@@ -302,6 +312,9 @@ async function round1() {
   assert(savedPost.content.includes('<h2>TipTap Heading</h2>') && savedPost.content.includes('<strong>Rich</strong>'), 'Rich post HTML was not persisted.');
   assert(savedPost.metaTitle === 'Feature Verify Meta' && savedPost.ogImage, 'SEO metadata was not persisted.');
   assert(savedPost.categories.length === 1 && savedPost.tags.length === 1, 'Post category/tag relations were not persisted.');
+  const publicPosts = await request('/posts?perPage=100', { expect: [200] });
+  const publicPost = publicPosts.body.data.posts.find(item => item.id === post.id);
+  assert(publicPost && !Object.prototype.hasOwnProperty.call(publicPost.author || {}, 'password'), 'Public post list leaked author password data.');
 
   const pageHtml = '<h2>Page Heading</h2><p><strong>Page</strong> rich text.</p>';
   const page = (await request('/pages', {
@@ -345,9 +358,23 @@ async function round2(context) {
   await request('/comments', {
     method: 'POST',
     token: unverifiedToken,
-    json: { postId: context.post.id, content: 'Blocked unverified comment.' },
-    expect: [403],
+    json: { postId: context.post.id, content: 'Unverified reader engagement comment.' },
+    expect: [200],
   });
+  const unverifiedPostLike = await request(`/posts/${context.post.id}/react`, {
+    method: 'POST',
+    token: unverifiedToken,
+    json: { type: 'LIKE' },
+    expect: [200],
+  });
+  assert(unverifiedPostLike.body.data.userReaction === 'LIKE', 'Unverified reader could not like a post.');
+  const unverifiedPostUnlike = await request(`/posts/${context.post.id}/react`, {
+    method: 'POST',
+    token: unverifiedToken,
+    json: { type: 'LIKE' },
+    expect: [200],
+  });
+  assert(unverifiedPostUnlike.body.data.userReaction === null, 'Unverified reader could not unlike a post.');
 
   const verificationToken = await waitForVerificationToken(unverifiedEmail);
   await request('/auth/verify-email', { method: 'POST', json: { token: verificationToken }, expect: [200] });

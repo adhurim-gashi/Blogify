@@ -3,6 +3,14 @@ const { makeSlug } = require('../utils/slugify');
 const sanitizeHtml = require('sanitize-html');
 const { recordAuditLog } = require('../utils/auditLog');
 
+const authorSelect = {
+  id: true,
+  username: true,
+  name: true,
+  bio: true,
+  emailVerified: true,
+};
+
 function publicPostWhere(extra = {}) {
   const now = new Date();
   return {
@@ -60,7 +68,7 @@ async function list(req, res, next) {
     if (!['Admin', 'Author'].includes(roleName)) Object.assign(where, publicPostWhere());
     if (q) where.AND.push({ OR: [{ title: { contains: q } }, { content: { contains: q } }] });
     const [posts, total] = await prisma.$transaction([
-      prisma.post.findMany({ where, skip, take, orderBy: { createdAt: 'desc' }, include: { author: true, categories: true, tags: true } }),
+      prisma.post.findMany({ where, skip, take, orderBy: { createdAt: 'desc' }, include: { author: { select: authorSelect }, categories: true, tags: true } }),
       prisma.post.count({ where })
     ]);
     res.json({ success: true, data: { posts, meta: { total } } });
@@ -70,7 +78,7 @@ async function list(req, res, next) {
 async function getById(req, res, next) {
   try {
     const { id } = req.validated || req.params;
-    const post = await prisma.post.findUnique({ where: { id }, include: { author: true, categories: true, tags: true, media: true, comments: true } });
+    const post = await prisma.post.findUnique({ where: { id }, include: { author: { select: authorSelect }, categories: true, tags: true, media: true, comments: true } });
     if (!post) return res.status(404).json({ success: false, error: 'Not found' });
     res.json({ success: true, data: { post } });
   } catch (err) { next(err); }
@@ -81,12 +89,19 @@ async function getBySlug(req, res, next) {
     const { slug } = req.validated || req.params;
     const post = await prisma.post.findFirst({
       where: publicPostWhere({ slug }),
-      include: { author: true, categories: true, tags: true, media: true, comments: true }
+      include: { author: { select: authorSelect }, categories: true, tags: true, media: true, comments: true }
     });
     if (!post) return res.status(404).json({ success: false, error: 'Not found' });
     // increment views
     await prisma.post.update({ where: { id: post.id }, data: { views: { increment: 1 } } });
-    res.json({ success: true, data: { post } });
+    const [likeCount, dislikeCount, userReaction] = await Promise.all([
+      prisma.postReaction.count({ where: { postId: post.id, type: 'LIKE' } }),
+      prisma.postReaction.count({ where: { postId: post.id, type: 'DISLIKE' } }),
+      req.user
+        ? prisma.postReaction.findUnique({ where: { postId_userId: { postId: post.id, userId: req.user.id } } })
+        : Promise.resolve(null)
+    ]);
+    res.json({ success: true, data: { post: { ...post, likeCount, dislikeCount, userReaction: userReaction?.type || null } } });
   } catch (err) { next(err); }
 }
 
@@ -150,7 +165,7 @@ async function update(req, res, next) {
       data.tags = { set: tgs.map(t => ({ id: t.id })) };
     }
 
-    const updated = await prisma.post.update({ where: { id }, data, include: { author: true, categories: true, tags: true } });
+    const updated = await prisma.post.update({ where: { id }, data, include: { author: { select: authorSelect }, categories: true, tags: true } });
     if (existingPost && existingPost.status !== updated.status) {
       await recordAuditLog({
         action: updated.status === 'PUBLISHED' ? 'post_publish' : 'post_unpublish',
@@ -175,4 +190,39 @@ async function remove(req, res, next) {
   } catch (err) { next(err); }
 }
 
-module.exports = { list, getById, getBySlug, create, update, remove };
+async function toggleReaction(req, res, next) {
+  try {
+    const { id, type = 'LIKE' } = req.validated || req.params;
+    const post = await prisma.post.findFirst({ where: publicPostWhere({ id }) });
+    if (!post) {
+      return res.status(404).json({ success: false, data: null, message: 'Post is not available for reactions.' });
+    }
+
+    const existing = await prisma.postReaction.findUnique({
+      where: { postId_userId: { postId: id, userId: req.user.id } },
+    });
+
+    let userReaction = type;
+    if (existing?.type === type) {
+      await prisma.postReaction.delete({ where: { id: existing.id } });
+      userReaction = null;
+    } else if (existing) {
+      await prisma.postReaction.update({ where: { id: existing.id }, data: { type } });
+    } else {
+      await prisma.postReaction.create({ data: { postId: id, userId: req.user.id, type } });
+    }
+
+    const [likeCount, dislikeCount] = await prisma.$transaction([
+      prisma.postReaction.count({ where: { postId: id, type: 'LIKE' } }),
+      prisma.postReaction.count({ where: { postId: id, type: 'DISLIKE' } }),
+    ]);
+
+    res.json({
+      success: true,
+      data: { userReaction, likeCount, dislikeCount },
+      message: userReaction ? 'Reaction saved.' : 'Reaction removed.',
+    });
+  } catch (err) { next(err); }
+}
+
+module.exports = { list, getById, getBySlug, create, update, remove, toggleReaction };

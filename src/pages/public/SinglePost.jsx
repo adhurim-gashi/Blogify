@@ -20,7 +20,7 @@ const SinglePost = () => {
             setLoading(true);
             setMessage("");
             try {
-                const postRes = await api.get(`/posts/${slug}`, { needsAuth: false });
+                const postRes = await api.get(`/posts/${slug}`, { needsAuth: Boolean(user) });
                 const loadedPost = postRes.data?.post || postRes.data;
                 setPost(loadedPost);
 
@@ -36,7 +36,7 @@ const SinglePost = () => {
         };
 
         loadPost();
-    }, [slug]);
+    }, [slug, user]);
 
     useEffect(() => {
         if (!post) return;
@@ -76,15 +76,33 @@ const SinglePost = () => {
         return roots;
     };
 
-    const handleArticleReaction = () => {
+    const handleArticleReaction = async (type) => {
         if (!user) {
+            setMessage("You must be logged in to react to posts.");
             navigate("/login");
+            return;
+        }
+
+        try {
+            const res = await api.post(`/posts/${post.id}/react`, { type });
+            if (res.success) {
+                setPost(current => ({
+                    ...current,
+                    likeCount: res.data.likeCount,
+                    dislikeCount: res.data.dislikeCount,
+                    userReaction: res.data.userReaction,
+                }));
+                setMessage(res.message || "Reaction saved.");
+            }
+        } catch (err) {
+            setMessage(err.message || "Unable to react to this post.");
         }
     };
 
     const handleCommentSubmit = async (e, parentId = null) => {
         e.preventDefault();
         if (!user) {
+            setMessage("You must be logged in to comment.");
             navigate("/login");
             return;
         }
@@ -118,6 +136,7 @@ const SinglePost = () => {
 
     const handleCommentReaction = async (commentId) => {
         if (!user) {
+            setMessage("You must be logged in to like comments.");
             navigate("/login");
             return;
         }
@@ -215,6 +234,7 @@ const SinglePost = () => {
             {message && (
                 <div className={`mb-6 p-3 rounded-md text-sm ${
                     message.includes("moderation")
+                    || message.includes("Reaction")
                         ? "bg-green-100 text-green-700"
                         : "bg-red-100 text-red-700"
                 }`}>
@@ -254,15 +274,23 @@ const SinglePost = () => {
                         </p>
 
                         <div className="flex gap-4">
-                            <button className="border border-green-500 text-green-600 px-4 py-2 rounded-md font-medium hover:bg-green-500 hover:text-white transition duration-300"
-                            onClick={handleArticleReaction}
+                            <button className={`border px-4 py-2 rounded-md font-medium transition duration-300 ${
+                                post.userReaction === "LIKE"
+                                    ? "border-green-600 bg-green-600 text-white"
+                                    : "border-green-500 text-green-600 hover:bg-green-500 hover:text-white"
+                            }`}
+                            onClick={() => handleArticleReaction("LIKE")}
                             >
-                            Like
+                            Like ({post.likeCount || 0})
                             </button>
-                            <button className="border border-red-500 text-red-600 px-4 py-2 rounded-md font-medium hover:bg-red-500 hover:text-white transition duration-300"
-                            onClick={handleArticleReaction}
+                            <button className={`border px-4 py-2 rounded-md font-medium transition duration-300 ${
+                                post.userReaction === "DISLIKE"
+                                    ? "border-red-600 bg-red-600 text-white"
+                                    : "border-red-500 text-red-600 hover:bg-red-500 hover:text-white"
+                            }`}
+                            onClick={() => handleArticleReaction("DISLIKE")}
                             >
-                            Dislike
+                            Dislike ({post.dislikeCount || 0})
                             </button>
                         </div>
                     </div>

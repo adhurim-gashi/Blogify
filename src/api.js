@@ -1,5 +1,10 @@
-// API utility module for consistent API calls with auth token handling
-export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api').replace(/\/$/, '');
+// API utility module for consistent API calls with auth token handling.
+// VITE_API_URL may point to either the API origin (http://localhost:4000)
+// or the full API base (http://localhost:4000/api), which keeps local and
+// production deployments from hardcoding a backend port into the bundle.
+const configuredApiUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api';
+const normalizedApiUrl = configuredApiUrl.replace(/\/$/, '');
+export const API_BASE_URL = normalizedApiUrl.endsWith('/api') ? normalizedApiUrl : `${normalizedApiUrl}/api`;
 export const API_ORIGIN = API_BASE_URL.replace(/\/api$/, '');
 
 const normalizeEndpoint = (endpoint) => endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
@@ -88,8 +93,8 @@ export const apiCall = async (endpoint, options = {}) => {
   try {
     res = await fetch(url, config);
   } catch (networkErr) {
-    // Network error (no connection, CORS issue, etc.)
-    const message = `Network error: Unable to reach ${url}. Is the backend server running on port 4000?`;
+    // Network errors are usually backend-down, wrong VITE_API_URL, or CORS.
+    const message = `Unable to reach the Blogify API at ${API_BASE_URL}. Check that the backend is running and that VITE_API_URL matches its port.`;
     void networkErr;
     throw new Error(message);
   }
@@ -155,7 +160,7 @@ export const api = {
         body: formData
       });
     } catch (networkErr) {
-      const message = `Network error uploading to ${endpoint}. Is the server running?`;
+      const message = `Unable to upload because the Blogify API at ${API_BASE_URL} is unreachable. Check the backend server and VITE_API_URL.`;
       void networkErr;
       throw new Error(message);
     }

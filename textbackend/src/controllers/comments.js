@@ -1,6 +1,8 @@
 const prisma = require('../utils/prisma');
 const { recordAuditLog } = require('../utils/auditLog');
 
+const publicAuthorSelect = { id: true, email: true, username: true, name: true };
+
 function publicPostWhere(id) {
   const now = new Date();
   return {
@@ -73,7 +75,7 @@ async function listAll(req, res, next) {
     const [comments, total] = await prisma.$transaction([
       prisma.comment.findMany({
         where: { deletedAt: null },
-        include: { post: true, author: true },
+        include: { post: true, author: { select: publicAuthorSelect } },
         orderBy: { createdAt: 'desc' },
         take,
         skip

@@ -38,4 +38,9 @@ const updatePostSchema = z.object({
   tags: z.array(z.string().uuid()).optional(),
 });
 
-module.exports = { createPostSchema, listPostsSchema, slugParam, updatePostSchema };
+const postReactionSchema = z.object({
+  id: z.string().uuid(),
+  type: z.enum(['LIKE', 'DISLIKE']).default('LIKE'),
+});
+
+module.exports = { createPostSchema, listPostsSchema, slugParam, updatePostSchema, postReactionSchema };
