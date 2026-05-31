@@ -11,8 +11,8 @@ router.get('/', validate(listPagesSchema), pagesController.list);
 const uuidPath = '/:id([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})';
 router.get(uuidPath, validate(idParam), pagesController.getById);
 router.get('/:slug', validate(slugParam), pagesController.getBySlug);
-router.post('/', requireAuth, requireVerifiedEmail, perUserRateLimit({ max: 30 }), requireRole('Admin','Author'), validate(createPageSchema), pagesController.create);
-router.put(uuidPath, requireAuth, requireVerifiedEmail, perUserRateLimit({ max: 30 }), requireRole('Admin','Author'), validate(updatePageSchema), pagesController.update);
-router.delete(uuidPath, requireAuth, perUserRateLimit({ max: 30 }), requireRole('Admin','Author'), validate(idParam), pagesController.remove);
+router.post('/', requireAuth, requireVerifiedEmail, perUserRateLimit({ max: 30 }), requireRole('Admin'), validate(createPageSchema), pagesController.create);
+router.put(uuidPath, requireAuth, requireVerifiedEmail, perUserRateLimit({ max: 30 }), requireRole('Admin'), validate(updatePageSchema), pagesController.update);
+router.delete(uuidPath, requireAuth, perUserRateLimit({ max: 30 }), requireRole('Admin'), validate(idParam), pagesController.remove);
 
 module.exports = router;

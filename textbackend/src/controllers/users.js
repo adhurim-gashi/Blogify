@@ -47,8 +47,10 @@ async function get(req, res, next) {
 async function update(req, res, next) {
   try {
     const { id, email, username, name, bio, role } = req.validated || { id: req.params.id, ...req.body };
-    const canManageUsers = ['Admin', 'Author'].includes(req.user.role.name);
-    if (!canManageUsers && req.user.id !== id) {
+    const isAdmin = req.user.role.name === 'Admin';
+    // Non-admin accounts may update only their own profile fields. Role and
+    // account-state changes are deliberately reserved for Admin routes.
+    if (!isAdmin && req.user.id !== id) {
       return res.status(403).json({ success: false, error: 'Forbidden' });
     }
     const data = {};
@@ -66,7 +68,7 @@ async function update(req, res, next) {
     }
     const existing = await prisma.user.findUnique({ where: { id }, include: { role: true } });
     if (role !== undefined) {
-      if (req.user.role.name !== 'Admin') {
+      if (!isAdmin) {
         return res.status(403).json({ success: false, data: null, message: 'Only Admins can change user roles.' });
       }
       const roleRecord = await prisma.role.upsert({ where: { name: role }, update: {}, create: { name: role } });

@@ -1,8 +1,11 @@
 import { Link } from "react-router";
 import { useState, useEffect, useCallback } from "react";
 import { api } from "../api";
+import { useAuth } from "../auth-context";
+import { isAdmin } from "../auth-roles";
 
 const Posts = () => {
+  const { user } = useAuth();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
@@ -44,6 +47,8 @@ const Posts = () => {
       setMessage(err.message || "Error deleting post");
     }
   };
+
+  const canManagePost = (post) => isAdmin(user) || post.author?.id === user?.id || post.authorId === user?.id;
 
   if (loading) {
     return (
@@ -116,18 +121,24 @@ const Posts = () => {
                     {new Date(post.createdAt).toLocaleDateString()}
                   </td>
                   <td className="py-3 px-2 flex gap-2">
-                    <Link
-                      to={`/posts/edit/${post.id}`}
-                      className="bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-600"
-                    >
-                      Edit
-                    </Link>
-                    <button
-                      onClick={() => handleDelete(post.id)}
-                      className="bg-red-500 text-white px-3 py-1 rounded text-xs hover:bg-red-600"
-                    >
-                      Delete
-                    </button>
+                    {canManagePost(post) ? (
+                      <>
+                        <Link
+                          to={`/posts/edit/${post.id}`}
+                          className="bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-600"
+                        >
+                          Edit
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(post.id)}
+                          className="bg-red-500 text-white px-3 py-1 rounded text-xs hover:bg-red-600"
+                        >
+                          Delete
+                        </button>
+                      </>
+                    ) : (
+                      <span className="text-xs text-slate-400">No actions</span>
+                    )}
                   </td>
                 </tr>
               ))}

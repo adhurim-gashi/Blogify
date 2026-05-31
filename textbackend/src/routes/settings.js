@@ -7,8 +7,8 @@ const { settingSchema, idParam, updateSettingSchema, listSettingsSchema } = requ
 const perUserRateLimit = require('../middlewares/perUserRateLimit');
 
 router.get('/', validate(listSettingsSchema), settingsController.list);
-router.post('/', requireAuth, perUserRateLimit({ max: 10 }), requireRole('Admin','Author'), validate(settingSchema), settingsController.create);
-router.put('/:id', requireAuth, perUserRateLimit({ max: 10 }), requireRole('Admin','Author'), validate(updateSettingSchema), settingsController.update);
-router.delete('/:id', requireAuth, perUserRateLimit({ max: 10 }), requireRole('Admin','Author'), validate(idParam), settingsController.remove);
+router.post('/', requireAuth, perUserRateLimit({ max: 10 }), requireRole('Admin'), validate(settingSchema), settingsController.create);
+router.put('/:id', requireAuth, perUserRateLimit({ max: 10 }), requireRole('Admin'), validate(updateSettingSchema), settingsController.update);
+router.delete('/:id', requireAuth, perUserRateLimit({ max: 10 }), requireRole('Admin'), validate(idParam), settingsController.remove);
 
 module.exports = router;

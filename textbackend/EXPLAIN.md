@@ -44,19 +44,19 @@ This document explains models, relations, endpoints, how to run, env variables, 
 - POST /api/home/newsletter/subscribe - public newsletter subscription.
 - GET /sitemap.xml - public XML sitemap for visible pages and published posts.
 
-- GET /api/posts - list posts. Query: `page`, `perPage`, `q` (search). Public callers only receive `PUBLISHED` posts; authenticated Admin/Author callers can see drafts.
+- GET /api/posts - list posts. Query: `page`, `perPage`, `q` (search). Public callers only receive `PUBLISHED` posts; Admins can see all non-deleted posts; Authors can see only their own non-deleted posts.
 - GET /api/posts/:slug - get post by slug. Public and published-only.
 - POST /api/posts/:id/react - logged-in users can toggle `LIKE` or `DISLIKE` on a published post; email verification is not required for reader engagement.
 - POST /api/posts - create post. Auth: verified `Author|Admin`. Body: `{ title, content, excerpt?, status?, isScheduled?, scheduledAt?, categories?: [id], tags?: [id], metaTitle?, metaDescription?, ogImage? }`.
-- PUT /api/posts/:id - update post. Auth: `Author|Admin`.
-- DELETE /api/posts/:id - soft-delete post. Auth: `Author|Admin`.
+- PUT /api/posts/:id - update post. Auth: `Admin`, or the owning `Author`.
+- DELETE /api/posts/:id - soft-delete post. Auth: `Admin`, or the owning `Author`.
 
 - GET /api/categories - list categories.
-- POST /api/categories - create category. Auth: `Author|Admin`.
+- POST /api/categories - create category. Auth: `Admin`.
 
 - POST /api/media - upload file (`multipart/form-data`, field `file`). Auth required. Image uploads are resized, compressed, and saved with WebP variants when possible.
 - GET /api/media - list media.
- - DELETE /api/media/:id - delete media (Admin/Author). Removes DB record and attempts to unlink file on disk. Implements spec #10.
+ - DELETE /api/media/:id - delete media (Admin). Removes DB record and attempts to unlink file on disk. Implements spec #10.
 
 - GET /api/users - list users. Auth: `Admin`.
 - GET /api/users/me - current user (requires access token).
@@ -69,8 +69,8 @@ This document explains models, relations, endpoints, how to run, env variables, 
 Comments moderation:
 - POST /api/comments - logged-in users can submit comments or replies with optional `parentId`; comments require approval before public display, but email verification is not required.
 - GET /api/comments/post/:postId - public approved comments for a post, including `parentId` and reaction counts for threaded UIs.
-- POST /api/comments/:id/approve - Admin/Author: approve a comment (sets `approved=true`).
-- POST /api/comments/:id/reject - Admin/Author: reject (soft-delete) a comment.
+- POST /api/comments/:id/approve - Admin: approve a comment (sets `approved=true`).
+- POST /api/comments/:id/reject - Admin: reject (soft-delete) a comment.
 - POST /api/comments/:id/react - logged-in users can toggle a `LIKE` reaction on an approved comment.
 
 Audit logs:
@@ -80,6 +80,12 @@ Newsletter subscribers:
 - POST /api/newsletter/subscribe - subscribe (public).
 - GET /api/newsletter/subscribers - list subscribers (Admin only).
 - DELETE /api/newsletter/subscribers/:id - remove subscriber (Admin only).
+
+## Role policy
+
+- Readers can browse public content and engage with published posts through comments and reactions.
+- Authors can create posts and manage only posts they own. They cannot list users, disable accounts, change roles, moderate comments, update settings, manage pages/media/categories/tags/newsletter subscribers, or access dashboard/audit data.
+- Admins retain full administrative access.
 
 Responses follow a consistent shape:
 

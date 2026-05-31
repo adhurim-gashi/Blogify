@@ -42,7 +42,7 @@ async function listByPost(req, res, next) {
   try {
     const { postId } = req.validated || req.params;
     // Only return approved comments for public listing to enforce moderation workflow
-    // Admins may need a separate endpoint to list all comments; for now, public listing is filtered
+    // Admin moderation uses a separate endpoint; public listing is filtered.
     const where = { postId, deletedAt: null, approved: true };
     const comments = await prisma.comment.findMany({
       where,
@@ -96,7 +96,7 @@ async function remove(req, res, next) {
 }
 
 // Approve a comment (set approved = true)
-// Protected route should be added in routes: only Admin/Author can call
+// Protected route is Admin-only in routes.
 // Implements spec #8: approve comment
 async function approve(req, res, next) {
   try {
@@ -108,7 +108,7 @@ async function approve(req, res, next) {
 }
 
 // Reject a comment (soft-delete or mark deletedAt)
-// Protected route should be added in routes: only Admin/Author can call
+// Protected route is Admin-only in routes.
 // Implements spec #8: reject comment
 async function reject(req, res, next) {
   try {
@@ -125,21 +125,20 @@ async function toggleReaction(req, res, next) {
     const comment = await prisma.comment.findFirst({ where: { id, deletedAt: null, approved: true } });
     if (!comment) return res.status(404).json({ success: false, data: null, message: 'Comment not found.' });
 
-    const existing = await prisma.commentReaction.findUnique({
-      where: { commentId_userId_type: { commentId: id, userId: req.user.id, type } },
-    });
-
-    if (existing) {
-      await prisma.commentReaction.delete({ where: { id: existing.id } });
-    } else {
-      await prisma.commentReaction.create({ data: { commentId: id, userId: req.user.id, type } });
+    const removed = await prisma.commentReaction.deleteMany({ where: { commentId: id, userId: req.user.id, type } });
+    if (removed.count === 0) {
+      await prisma.commentReaction.upsert({
+        where: { commentId_userId_type: { commentId: id, userId: req.user.id, type } },
+        update: {},
+        create: { commentId: id, userId: req.user.id, type },
+      });
     }
 
     const reactionCount = await prisma.commentReaction.count({ where: { commentId: id, type } });
     res.json({
       success: true,
-      data: { liked: !existing, reactionCount },
-      message: existing ? 'Reaction removed.' : 'Reaction saved.',
+      data: { liked: removed.count === 0, reactionCount },
+      message: removed.count > 0 ? 'Reaction removed.' : 'Reaction saved.',
     });
   } catch (err) { next(err); }
 }

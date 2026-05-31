@@ -13,6 +13,8 @@ const SinglePost = () => {
     const [replyTextById, setReplyTextById] = useState({});
     const [replyingTo, setReplyingTo] = useState("");
     const [loading, setLoading] = useState(true);
+    const [articleReactionLoading, setArticleReactionLoading] = useState(false);
+    const [commentReactionLoading, setCommentReactionLoading] = useState("");
     const [message, setMessage] = useState("");
 
     useEffect(() => {
@@ -84,6 +86,7 @@ const SinglePost = () => {
         }
 
         try {
+            setArticleReactionLoading(true);
             const res = await api.post(`/posts/${post.id}/react`, { type });
             if (res.success) {
                 setPost(current => ({
@@ -96,6 +99,8 @@ const SinglePost = () => {
             }
         } catch (err) {
             setMessage(err.message || "Unable to react to this post.");
+        } finally {
+            setArticleReactionLoading(false);
         }
     };
 
@@ -142,6 +147,7 @@ const SinglePost = () => {
         }
 
         try {
+            setCommentReactionLoading(commentId);
             const res = await api.post(`/comments/${commentId}/react`, { type: "LIKE" });
             if (res.success) {
                 setComments(current => current.map(comment =>
@@ -152,6 +158,8 @@ const SinglePost = () => {
             }
         } catch (err) {
             setMessage(err.message || "Unable to react to comment.");
+        } finally {
+            setCommentReactionLoading("");
         }
     };
 
@@ -173,9 +181,10 @@ const SinglePost = () => {
                     <button
                         type="button"
                         onClick={() => handleCommentReaction(comment.id)}
-                        className="rounded-md border border-slate-300 px-3 py-1 font-medium text-slate-600 hover:border-blue-500 hover:text-blue-600"
+                        disabled={commentReactionLoading === comment.id}
+                        className="rounded-md border border-slate-300 px-3 py-1 font-medium text-slate-600 hover:border-blue-500 hover:text-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                        Like ({comment.reactionCount || 0})
+                        {commentReactionLoading === comment.id ? "Saving..." : `Like (${comment.reactionCount || 0})`}
                     </button>
                     <button
                         type="button"
@@ -274,23 +283,25 @@ const SinglePost = () => {
                         </p>
 
                         <div className="flex gap-4">
-                            <button className={`border px-4 py-2 rounded-md font-medium transition duration-300 ${
+                            <button className={`border px-4 py-2 rounded-md font-medium transition duration-300 disabled:cursor-not-allowed disabled:opacity-60 ${
                                 post.userReaction === "LIKE"
                                     ? "border-green-600 bg-green-600 text-white"
                                     : "border-green-500 text-green-600 hover:bg-green-500 hover:text-white"
                             }`}
                             onClick={() => handleArticleReaction("LIKE")}
+                            disabled={articleReactionLoading}
                             >
-                            Like ({post.likeCount || 0})
+                            {articleReactionLoading ? "Saving..." : `Like (${post.likeCount || 0})`}
                             </button>
-                            <button className={`border px-4 py-2 rounded-md font-medium transition duration-300 ${
+                            <button className={`border px-4 py-2 rounded-md font-medium transition duration-300 disabled:cursor-not-allowed disabled:opacity-60 ${
                                 post.userReaction === "DISLIKE"
                                     ? "border-red-600 bg-red-600 text-white"
                                     : "border-red-500 text-red-600 hover:bg-red-500 hover:text-white"
                             }`}
                             onClick={() => handleArticleReaction("DISLIKE")}
+                            disabled={articleReactionLoading}
                             >
-                            Dislike ({post.dislikeCount || 0})
+                            {articleReactionLoading ? "Saving..." : `Dislike (${post.dislikeCount || 0})`}
                             </button>
                         </div>
                     </div>

@@ -9,8 +9,8 @@ const { listTagsSchema } = require('../validation/tags');
 
 router.get('/', validate(listTagsSchema), tagsController.list);
 router.get('/:id', validate(idParam), tagsController.getById);
-router.post('/', requireAuth, perUserRateLimit({ max: 30 }), requireRole('Admin','Author'), validate(tagSchema), tagsController.create);
-router.put('/:id', requireAuth, perUserRateLimit({ max: 30 }), requireRole('Admin','Author'), validate(updateTagSchema), tagsController.update);
-router.delete('/:id', requireAuth, perUserRateLimit({ max: 30 }), requireRole('Admin','Author'), validate(idParam), tagsController.remove);
+router.post('/', requireAuth, perUserRateLimit({ max: 30 }), requireRole('Admin'), validate(tagSchema), tagsController.create);
+router.put('/:id', requireAuth, perUserRateLimit({ max: 30 }), requireRole('Admin'), validate(updateTagSchema), tagsController.update);
+router.delete('/:id', requireAuth, perUserRateLimit({ max: 30 }), requireRole('Admin'), validate(idParam), tagsController.remove);
 
 module.exports = router;

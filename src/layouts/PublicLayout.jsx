@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router";
 import { useAuth } from "../auth-context";
-import { canAccessAdmin } from "../auth-roles";
+import { getPostLoginPath, isAdmin, isAuthor } from "../auth-roles";
 
 const baseLinkClass = "flex min-h-11 items-center border-b-2 px-1 text-sm font-medium transition duration-200";
 
@@ -22,7 +22,7 @@ const mobileLinkClass = ({ isActive }) =>
 const PublicLayout = () => {
   const location = useLocation();
   const { user, logout } = useAuth();
-  const showDashboardLink = canAccessAdmin(user);
+  const showAdminLink = isAdmin(user) || isAuthor(user);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const publicLinks = [
@@ -35,7 +35,7 @@ const PublicLayout = () => {
   const accountLinks = user
     ? [
         { to: "/profile", label: "Profile" },
-        ...(showDashboardLink ? [{ to: "/", label: "Dashboard" }] : []),
+        ...(showAdminLink ? [{ to: getPostLoginPath(user), label: isAdmin(user) ? "Dashboard" : "Writer Posts" }] : []),
       ]
     : [
         { to: "/signup", label: "Sign Up" },

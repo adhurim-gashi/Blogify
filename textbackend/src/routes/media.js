@@ -16,11 +16,11 @@ const { validate } = require('../middlewares/validate');
 const { listMediaSchema } = require('../validation/media');
 const perUserRateLimit = require('../middlewares/perUserRateLimit');
 
-router.post('/', requireAuth, requireVerifiedEmail, perUserRateLimit({ max: 30 }), requireRole('Admin','Author'), upload.single('file'), mediaController.upload);
+router.post('/', requireAuth, requireVerifiedEmail, perUserRateLimit({ max: 30 }), requireRole('Admin'), upload.single('file'), mediaController.upload);
 router.get('/', validate(listMediaSchema), mediaController.list);
 const { idParam } = require('../validation/common');
 
-// Delete media - only Admin/Author
-router.delete('/:id', requireAuth, perUserRateLimit({ max: 20 }), requireRole('Admin','Author'), validate(idParam), mediaController.remove);
+// Delete media - Admin only, because removal can affect shared public content.
+router.delete('/:id', requireAuth, perUserRateLimit({ max: 20 }), requireRole('Admin'), validate(idParam), mediaController.remove);
 
 module.exports = router;

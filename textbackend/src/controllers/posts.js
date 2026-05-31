@@ -47,6 +47,26 @@ function normalizeScheduleInput(input) {
   return { isScheduled: true, scheduledAt, status: 'DRAFT' };
 }
 
+function isAuthor(user) {
+  return user?.role?.name === 'Author';
+}
+
+function ensureCanManagePost(user, post) {
+  if (!post) {
+    const err = new Error('Post not found.');
+    err.status = 404;
+    throw err;
+  }
+
+  // Authors are intentionally scoped to their own content. Admins retain
+  // global moderation powers, but Authors cannot read, edit, or delete others' drafts.
+  if (isAuthor(user) && post.authorId !== user.id) {
+    const err = new Error('Authors can only manage their own posts.');
+    err.status = 403;
+    throw err;
+  }
+}
+
 async function makeUniquePostSlug(value, currentId) {
   const base = makeSlug(value) || 'post';
   let slug = base;
@@ -65,7 +85,11 @@ async function list(req, res, next) {
     const skip = (parseInt(page) - 1) * take;
     const where = { deletedAt: null, AND: [] };
     const roleName = req.user?.role?.name || req.user?.role;
-    if (!['Admin', 'Author'].includes(roleName)) Object.assign(where, publicPostWhere());
+    if (roleName === 'Author') {
+      where.authorId = req.user.id;
+    } else if (roleName !== 'Admin') {
+      Object.assign(where, publicPostWhere());
+    }
     if (q) where.AND.push({ OR: [{ title: { contains: q } }, { content: { contains: q } }] });
     const [posts, total] = await prisma.$transaction([
       prisma.post.findMany({ where, skip, take, orderBy: { createdAt: 'desc' }, include: { author: { select: authorSelect }, categories: true, tags: true } }),
@@ -80,6 +104,7 @@ async function getById(req, res, next) {
     const { id } = req.validated || req.params;
     const post = await prisma.post.findUnique({ where: { id }, include: { author: { select: authorSelect }, categories: true, tags: true, media: true, comments: true } });
     if (!post) return res.status(404).json({ success: false, error: 'Not found' });
+    ensureCanManagePost(req.user, post);
     res.json({ success: true, data: { post } });
   } catch (err) { next(err); }
 }
@@ -135,6 +160,7 @@ async function update(req, res, next) {
   try {
     const { id } = req.validated || req.params;
     const existingPost = await prisma.post.findUnique({ where: { id } });
+    ensureCanManagePost(req.user, existingPost);
     const raw = { ...(req.validated || req.body) };
     delete raw.id;
     if (raw.content) raw.content = sanitizeHtml(raw.content, { allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img','h1','h2','h3']), allowedAttributes: { a: ['href','name','target'], img: ['src','alt'] } });
@@ -185,6 +211,8 @@ async function update(req, res, next) {
 async function remove(req, res, next) {
   try {
     const { id } = req.validated || req.params;
+    const existingPost = await prisma.post.findUnique({ where: { id } });
+    ensureCanManagePost(req.user, existingPost);
     const deleted = await prisma.post.update({ where: { id }, data: { deletedAt: new Date() } });
     res.json({ success: true, data: { post: deleted } });
   } catch (err) { next(err); }
@@ -198,18 +226,19 @@ async function toggleReaction(req, res, next) {
       return res.status(404).json({ success: false, data: null, message: 'Post is not available for reactions.' });
     }
 
-    const existing = await prisma.postReaction.findUnique({
-      where: { postId_userId: { postId: id, userId: req.user.id } },
+    let userReaction = type;
+    const removed = await prisma.postReaction.deleteMany({
+      where: { postId: id, userId: req.user.id, type },
     });
 
-    let userReaction = type;
-    if (existing?.type === type) {
-      await prisma.postReaction.delete({ where: { id: existing.id } });
+    if (removed.count > 0) {
       userReaction = null;
-    } else if (existing) {
-      await prisma.postReaction.update({ where: { id: existing.id }, data: { type } });
     } else {
-      await prisma.postReaction.create({ data: { postId: id, userId: req.user.id, type } });
+      await prisma.postReaction.upsert({
+        where: { postId_userId: { postId: id, userId: req.user.id } },
+        update: { type },
+        create: { postId: id, userId: req.user.id, type },
+      });
     }
 
     const [likeCount, dislikeCount] = await prisma.$transaction([

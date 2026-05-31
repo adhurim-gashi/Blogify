@@ -1,20 +1,20 @@
 import { useEffect, useState } from "react";
-import { Navigate, NavLink, Outlet } from "react-router";
+import { Navigate, NavLink, Outlet, useLocation } from "react-router";
 import { useAuth } from "../auth-context";
-import { canAccessAdmin } from "../auth-roles";
+import { canAccessAdmin, getPostLoginPath, isAdmin, isAuthor } from "../auth-roles";
 
 const adminLinks = [
-  { to: "/", label: "Dashboard", end: true },
-  { to: "/posts", label: "Posts" },
-  { to: "/categories", label: "Categories" },
-  { to: "/tags", label: "Tags" },
-  { to: "/comments", label: "Comments" },
-  { to: "/pages", label: "Pages" },
-  { to: "/media", label: "Media" },
-  { to: "/newsletter", label: "Newsletter" },
-  { to: "/settings", label: "Settings" },
-  { to: "/users", label: "Users" },
-  { to: "/audit-logs", label: "Audit Logs" },
+  { to: "/", label: "Dashboard", end: true, roles: ["Admin"] },
+  { to: "/posts", label: "Posts", roles: ["Admin", "Author"] },
+  { to: "/categories", label: "Categories", roles: ["Admin"] },
+  { to: "/tags", label: "Tags", roles: ["Admin"] },
+  { to: "/comments", label: "Comments", roles: ["Admin"] },
+  { to: "/pages", label: "Pages", roles: ["Admin"] },
+  { to: "/media", label: "Media", roles: ["Admin"] },
+  { to: "/newsletter", label: "Newsletter", roles: ["Admin"] },
+  { to: "/settings", label: "Settings", roles: ["Admin"] },
+  { to: "/users", label: "Users", roles: ["Admin"] },
+  { to: "/audit-logs", label: "Audit Logs", roles: ["Admin"] },
 ];
 
 const adminLinkClass = ({ isActive }) =>
@@ -22,16 +22,26 @@ const adminLinkClass = ({ isActive }) =>
     isActive ? "bg-slate-800 text-white" : "text-slate-300 hover:bg-slate-800 hover:text-white"
   }`;
 
-const AdminNav = ({ user, onLogout, onNavigate }) => (
+const canUseAdminPath = (user, pathname) => {
+  if (isAdmin(user)) return true;
+  if (!isAuthor(user)) return false;
+  return pathname === "/posts" || pathname === "/posts/create" || pathname.startsWith("/posts/edit/");
+};
+
+const AdminNav = ({ user, onLogout, onNavigate }) => {
+  const roleName = user.role?.name || user.role || "";
+  const visibleLinks = adminLinks.filter((link) => link.roles.includes(roleName));
+
+  return (
   <div className="flex h-full flex-col bg-slate-900 p-4 text-white">
     <nav className="mt-2 flex-1 overflow-y-auto" aria-label="Admin navigation">
-      <p className="mb-2 text-xs uppercase tracking-[0.2em] text-slate-400">Admin Dashboard</p>
-      <NavLink to="/" onClick={onNavigate} className="mb-8 block text-2xl font-bold">
+      <p className="mb-2 text-xs uppercase tracking-[0.2em] text-slate-400">{isAdmin(user) ? "Admin Dashboard" : "Writer Workspace"}</p>
+      <NavLink to={getPostLoginPath(user)} onClick={onNavigate} className="mb-8 block text-2xl font-bold">
         Blogify
       </NavLink>
 
       <ul className="space-y-2">
-        {adminLinks.map((link) => (
+        {visibleLinks.map((link) => (
           <li key={link.to}>
             <NavLink to={link.to} end={link.end} onClick={onNavigate} className={adminLinkClass}>
               {link.label}
@@ -52,10 +62,12 @@ const AdminNav = ({ user, onLogout, onNavigate }) => (
       </button>
     </div>
   </div>
-);
+  );
+};
 
 const AdminLayout = () => {
   const { user, isLoading, logout } = useAuth();
+  const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -82,6 +94,11 @@ const AdminLayout = () => {
   if (!canAccessAdmin(user)) {
     // Readers are public-site accounts only; redirect them before any admin UI renders.
     return <Navigate to="/home" replace state={{ accessDenied: true }} />;
+  }
+
+  if (!canUseAdminPath(user, location.pathname)) {
+    // Authors have a deliberately tiny workspace: create, edit, and manage only their own posts.
+    return <Navigate to={getPostLoginPath(user)} replace state={{ accessDenied: true }} />;
   }
 
   const handleLogout = async () => {
@@ -112,7 +129,7 @@ const AdminLayout = () => {
                 <span className={`absolute left-0 top-4 block h-0.5 w-5 rounded bg-current transition ${isMenuOpen ? "-translate-y-1.5 -rotate-45" : ""}`} />
               </span>
             </button>
-            <NavLink to="/" className="min-w-0 truncate text-xl font-bold text-slate-950">
+            <NavLink to={getPostLoginPath(user)} className="min-w-0 truncate text-xl font-bold text-slate-950">
               Blogify
             </NavLink>
             <span className="max-w-[8rem] truncate text-right text-xs font-medium text-slate-500">
