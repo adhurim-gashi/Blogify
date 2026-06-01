@@ -209,8 +209,8 @@ const Users = () => {
                 <th className="py-3 px-2">Name</th>
                 <th className="py-3 px-2">Email</th>
                 <th className="py-3 px-2">Role</th>
-                <th className="py-3 px-2">Status</th>
-                <th className="py-3 px-2">Email</th>
+                <th className="py-3 px-2">Email Status</th>
+                <th className="py-3 px-2">Account Status</th>
                 <th className="py-3 px-2">Actions</th>
               </tr>
             </thead>

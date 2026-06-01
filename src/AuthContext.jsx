@@ -1,10 +1,20 @@
 // Keeps session state and token lifecycle in one provider while the hook lives in auth-context.js for Fast Refresh.
 import { useState, useEffect, useCallback } from 'react';
-import { api, setTokens, clearTokens, getAccessToken } from './api';
+import { api, setTokens, clearTokens, getAccessToken, getRefreshToken, refreshAccessToken } from './api';
 import { AuthContext } from './auth-context';
 
+const readStoredUser = () => {
+  try {
+    const storedUser = localStorage.getItem('user');
+    return storedUser ? JSON.parse(storedUser) : null;
+  } catch {
+    localStorage.removeItem('user');
+    return null;
+  }
+};
+
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => readStoredUser());
   const [isLoading, setIsLoading] = useState(true);
 
   const storeUser = useCallback((userData) => {
@@ -23,22 +33,59 @@ export const AuthProvider = ({ children }) => {
     return userData;
   }, [storeUser]);
 
-  // Check if user is logged in on mount
-  useEffect(() => {
-    const token = getAccessToken();
-    if (token) {
-      // Try to load current user
-      refreshUser()
-        .catch(() => {
-          // Token is invalid, clear it
-          clearTokens();
-          storeUser(null);
-        })
-        .finally(() => setIsLoading(false));
-    } else {
-      setIsLoading(false);
+  const restoreSession = useCallback(async () => {
+    const accessToken = getAccessToken();
+    const refreshToken = getRefreshToken();
+
+    if (!accessToken && !refreshToken) {
+      storeUser(null);
+      return null;
+    }
+
+    try {
+      // A hard refresh can leave only the refresh token available; rotate it
+      // before loading /users/me so valid sessions survive page reloads.
+      if (!accessToken && refreshToken) {
+        await refreshAccessToken();
+      }
+      return await refreshUser();
+    } catch {
+      clearTokens();
+      storeUser(null);
+      return null;
     }
   }, [refreshUser, storeUser]);
+
+  // Restore a persisted session before protected routes decide whether to redirect.
+  useEffect(() => {
+    let isMounted = true;
+
+    restoreSession().finally(() => {
+      if (isMounted) setIsLoading(false);
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [restoreSession]);
+
+  useEffect(() => {
+    const handleStorage = (event) => {
+      if (event.key && !['accessToken', 'refreshToken', 'user'].includes(event.key)) return;
+
+      if (!getAccessToken() && !getRefreshToken()) {
+        setUser(null);
+        return;
+      }
+
+      const cachedUser = readStoredUser();
+      if (cachedUser) setUser(cachedUser);
+      restoreSession();
+    };
+
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, [restoreSession]);
 
   // Login user
   const login = async (email, password) => {

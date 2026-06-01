@@ -113,8 +113,9 @@ const PublicLayout = () => {
         {/* Mobile links explicitly close the panel so the next page is immediately usable after a tap. */}
         <div
           id="public-mobile-menu"
+          aria-hidden={!isMenuOpen}
           className={`overflow-hidden border-t bg-white transition-all duration-300 md:hidden ${
-            isMenuOpen ? "max-h-[32rem] opacity-100" : "max-h-0 opacity-0"
+            isMenuOpen ? "visible max-h-[32rem] opacity-100 pointer-events-auto" : "invisible max-h-0 opacity-0 pointer-events-none"
           }`}
         >
           <nav className="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-3 sm:px-6" aria-label="Mobile public navigation">
