@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { api, setTokens, clearTokens, getAccessToken, getRefreshToken, refreshAccessToken } from './api';
 import { AuthContext } from './auth-context';
 
+// Reads the saved user after refresh and clears it if the saved data is broken
 const readStoredUser = () => {
   try {
     const storedUser = localStorage.getItem('user');
@@ -17,6 +18,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => readStoredUser());
   const [isLoading, setIsLoading] = useState(true);
 
+  // Keeps react state and localstorage updated together
   const storeUser = useCallback((userData) => {
     setUser(userData);
     if (userData) {
@@ -33,6 +35,8 @@ export const AuthProvider = ({ children }) => {
     return userData;
   }, [storeUser]);
 
+
+  // Tries to keep the user logged in after page refresh.
   const restoreSession = useCallback(async () => {
     const accessToken = getAccessToken();
     const refreshToken = getRefreshToken();
@@ -87,7 +91,7 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener('storage', handleStorage);
   }, [restoreSession]);
 
-  // Login user
+  // Sends information/credentials to the backend and saves the returned tokens user
   const login = async (email, password) => {
     setIsLoading(true);
     try {
@@ -104,7 +108,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Register user
+  // This creates a new account and logs the user in after signup.
   const register = async (emailOrPayload, username, password, name) => {
     setIsLoading(true);
     try {
@@ -124,7 +128,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Logout user
+  // This logs out on the backend and then clears local tokens and user data.
   const logout = async () => {
     try {
       const refreshToken = localStorage.getItem('refreshToken');

@@ -62,6 +62,7 @@ export const refreshAccessToken = async () => {
 };
 
 // Main API fetch wrapper with auth and comprehensive error handling
+// Main function in which we make requests in the backend. 
 export const apiCall = async (endpoint, options = {}) => {
   const { method = 'GET', body, needsAuth = true, headers: optionHeaders = {}, ...fetchOptions } = options;
   const url = `${API_BASE_URL}${normalizeEndpoint(endpoint)}`;
